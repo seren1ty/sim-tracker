@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { Tooltip } from 'react-tooltip';
-import { SessionContext } from '../context/session.context';
+import { SessionContext } from '@/context/session.context';
 import AdminDataAdd from './admin/admin-data-add.component';
 import AdminDataAddDriver from './admin/admin-data-add-driver.component';
 import AdminDataAddGroup from './admin/admin-data-add-group.component';
 import AdminDataBoxes from './admin/admin-data-boxes.component';
-import { Car, Driver, Game, Group, NewDriver, NewGroup, Track } from '../types';
+import { Car, Driver, Game, Group, NewDriver, NewGroup, Track } from '@/types';
 import Image from 'next/image';
 
 const Admin = () => {

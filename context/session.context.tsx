@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { getAcTrackerState, setAcTrackerState } from '../utils/ac-localStorage';
-import { Session } from '../types';
+import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage';
+import { Session } from '@/types';
 
 type ContextProps = {
   children: React.ReactNode;

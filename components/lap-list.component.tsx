@@ -3,14 +3,14 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import { isBefore, isAfter } from 'date-fns';
 import LapItem from './lap-list/lap-item.component';
-import { SessionContext } from '../context/session.context';
+import { SessionContext } from '@/context/session.context';
 import {
   isLapRecord,
   isLapRecordForCar,
   isPersonalLapRecordForCar,
-} from '../utils/laptime.utils';
-import { Car, Driver, HoveredLap, Lap, Track } from '../types';
-import { getGameState, setGameState } from '../utils/ac-localStorage';
+} from '@/utils/laptime.utils';
+import { Car, Driver, HoveredLap, Lap, Track } from '@/types';
+import { getGameState, setGameState } from '@/utils/ac-localStorage';
 
 const LapList: React.FC = () => {
   const session = useContext(SessionContext);

@@ -2,13 +2,11 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { Tooltip } from 'react-tooltip';
-import { SessionContext } from '../../context/session.context';
-import {
-  getAcTrackerState,
-  setAcTrackerState,
-} from '../../utils/ac-localStorage';
-import { Game, Group } from '../../types';
+import { SessionContext } from '@/context/session.context';
+import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage';
+import { Game, Group } from '@/types';
 import Image from 'next/image';
+import logoutImg from '@/public/logout_blue.png';
 
 const Navbar = () => {
   const router = useRouter();
@@ -40,9 +38,19 @@ const Navbar = () => {
   }, [session?.driver]);
 
   useEffect(() => {
-    if (window.innerWidth < 390) session?.setShowMobile(true);
+    const handleResize = () => {
+      if (window.innerWidth < 390) {
+        session?.setShowMobile(true);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [window.innerWidth]);
+  }, []);
 
   const initGroups = () => {
     if (!session) return;
@@ -106,7 +114,7 @@ const Navbar = () => {
     });
   };
 
-  if (location.pathname.startsWith('/login')) {
+  if (router.pathname.startsWith('/login')) {
     return (
       <nav className="banner simple">
         <span className="nav-title">AC Tracker</span>
@@ -171,7 +179,7 @@ const Navbar = () => {
             onClick={logout}
           >
             <Image
-              src="/logout_blue.png"
+              src={logoutImg}
               alt="logout"
               className="logout-icon"
               priority

@@ -5,9 +5,10 @@ import axios from 'axios';
 //   GoogleLoginResponse,
 //   GoogleLoginResponseOffline,
 // } from 'react-google-login';
-import { SessionContext } from '../context/session.context';
+import { SessionContext } from '@/context/session.context';
 
 import Image from 'next/image';
+import loginImg from '@/public/login.jpg';
 
 const LoginComponent: React.FC = () => {
   const router = useRouter();
@@ -62,7 +63,7 @@ const LoginComponent: React.FC = () => {
             </div>
           </div>
           <div className="col-2 col-2-b">
-            <Image src="/login.jpg" alt="exciting_road" priority />
+            <Image src={loginImg} alt="exciting_road" priority />
           </div>
         </div>
       </div>

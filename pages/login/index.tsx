@@ -4,23 +4,18 @@ import { Inter } from 'next/font/google';
 import styles from '@/styles/Home.module.css';
 import LapList from '@/components/lap-list.component';
 import { NextPage } from 'next';
+import LoginComponent from '@/components/login.component';
 import Navbar from '@/components/common/navbar.component';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const LapListPage: NextPage = () => {
+const LoginPage: NextPage = () => {
   return (
     <>
-      <Head>
-        <title>Sim Tracker</title>
-        <meta name="description" content="Sim racing laptime tracker" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <Navbar />
-      <LapList />
+      <LoginComponent />;
     </>
   );
 };
 
-export default LapListPage;
+export default LoginPage;

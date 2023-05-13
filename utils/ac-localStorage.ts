@@ -1,89 +1,101 @@
-import { AcTrackerState, AcTrackerGameState } from "../types";
-import { Session } from "../types";
+import { AcTrackerState, AcTrackerGameState } from '@/types';
+import { Session } from '@/types';
+
+const getItem = (key: string) => {
+  const item =
+    typeof window !== 'undefined'
+      ? window.localStorage.getItem(key)
+      : undefined;
+
+  return !!item ? JSON.parse(item) : undefined;
+};
+
+const setItem = (key: string, value: any) => {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  }
+};
 
 export const getAcTrackerState = (): AcTrackerState => {
-    const stateStr = localStorage.getItem('acTracker');
+  const state = getItem('acTracker');
 
-    if (!stateStr) {
-        let newState = {
-            group: null,
-            game: null,
-            driver: null
-        };
+  if (!state) {
+    let newState = {
+      group: null,
+      game: null,
+      driver: null,
+    };
 
-        setAcTrackerState(newState);
+    setAcTrackerState(newState);
 
-        return newState;
-    }
+    return newState;
+  }
 
-    return JSON.parse(stateStr);
-}
+  return state;
+};
 
 export const setAcTrackerState = (state: AcTrackerState): void => {
-    localStorage.setItem('acTracker', JSON.stringify(state));
-}
+  setItem('acTracker', state);
+};
 
 export const getGameState = (session: Session | null) => {
-    return getAcTrackerGameState(session?.group, session?.game);
-}
+  return getAcTrackerGameState(session?.group, session?.game);
+};
 
-export const setGameState = (session: Session | null, state: AcTrackerGameState) => {
-    setAcTrackerGameState(session?.group, session?.game, state);
-}
+export const setGameState = (
+  session: Session | null,
+  state: AcTrackerGameState
+) => {
+  setAcTrackerGameState(session?.group, session?.game, state);
+};
 
 const getAcTrackerGameState = (
-        group: string | null | undefined,
-        game: string | null | undefined
-    ): AcTrackerGameState => {
+  group: string | null | undefined,
+  game: string | null | undefined
+): AcTrackerGameState => {
+  let currGroup = group;
+  if (!currGroup) currGroup = getAcTrackerState().group;
 
-    let currGroup = group;
-    if (!currGroup)
-        currGroup = getAcTrackerState().group;
+  let currGame = game;
+  if (!currGame) currGame = getAcTrackerState().game;
 
-    let currGame = game;
-    if (!currGame)
-        currGame = getAcTrackerState().game;
+  const state = getItem('acTracker_' + currGroup + '_' + currGame);
 
-    const stateStr = localStorage.getItem('acTracker_' + currGroup + '_' + currGame);
+  if (!state) {
+    let newState = {
+      trackType: 'ALL',
+      carType: 'ALL',
+      driverType: 'ALL',
+      sortType: 'DATE',
 
-    if (!stateStr) {
-        let newState = {
-            trackType: 'ALL',
-            carType: 'ALL',
-            driverType: 'ALL',
-            sortType: 'DATE',
+      currentLapToEdit: null,
 
-            currentLapToEdit: null,
+      newLapDefaultTrack: '',
+      newLapDefaultCar: '',
+      newLapDefaultGearbox: 'Automatic',
+      newLapDefaultTraction: 'Factory',
+      newLapDefaultStability: 'Factory',
+      newLapDefaultNotes: '',
+    };
 
-            newLapDefaultTrack: '',
-            newLapDefaultCar: '',
-            newLapDefaultGearbox: 'Automatic',
-            newLapDefaultTraction: 'Factory',
-            newLapDefaultStability: 'Factory',
-            newLapDefaultNotes: ''
-        };
+    setAcTrackerGameState(currGroup, currGame, newState);
 
-        setAcTrackerGameState(currGroup, currGame, newState);
+    return newState;
+  }
 
-        return newState;
-    }
-
-    return JSON.parse(stateStr);
-}
+  return state;
+};
 
 const setAcTrackerGameState = (
-        group: string | null | undefined,
-        game: string | null | undefined,
-        state: AcTrackerGameState
-    ): void => {
+  group: string | null | undefined,
+  game: string | null | undefined,
+  state: AcTrackerGameState
+): void => {
+  let currGroup = group;
+  if (!currGroup) currGroup = getAcTrackerState().group;
 
-    let currGroup = group;
-    if (!currGroup)
-        currGroup = getAcTrackerState().group;
+  let currGame = game;
+  if (!currGame) currGame = getAcTrackerState().game;
 
-    let currGame = game;
-    if (!currGame)
-        currGame = getAcTrackerState().game;
-
-    localStorage.setItem('acTracker_' + currGroup + '_' + currGame, JSON.stringify(state));
-}
+  setItem('acTracker_' + currGroup + '_' + currGame, state);
+};

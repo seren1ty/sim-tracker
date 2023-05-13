@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NewDriver } from '../../types';
+import { NewDriver } from '@/types';
 
 type AdminDataAddDriverProps = {
   onSave: (driver: NewDriver) => void;

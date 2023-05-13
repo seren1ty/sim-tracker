@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { Driver, Lap } from '../../types';
+import { Driver, Lap } from '@/types';
 
 type LapActionsProps = {
   sessionDriver: Driver | null | undefined;

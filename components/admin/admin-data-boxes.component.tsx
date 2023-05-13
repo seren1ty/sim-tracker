@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Truncator from '../common/truncator.component';
+import Truncator from '@/components/common/truncator.component';
 import { Tooltip } from 'react-tooltip';
 
 type AdminBoxData = {

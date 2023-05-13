@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NewGroup } from '../../types';
+import { NewGroup } from '@/types';
 
 type AdminDataAddGroupProps = {
   onSave: (group: NewGroup) => void;

@@ -3,16 +3,16 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { SessionContext } from '../context/session.context';
+import { SessionContext } from '@/context/session.context';
 import {
   generateSplitToFasterLap,
   generateSplitToSlowerLap,
   isLapRecord,
   isLapRecordForCar,
   isPersonalLapRecordForCar,
-} from '../utils/laptime.utils';
-import { Car, Lap, Track } from '../types';
-import { getGameState, setGameState } from '../utils/ac-localStorage';
+} from '@/utils/laptime.utils';
+import { Car, Lap, Track } from '@/types';
+import { getGameState, setGameState } from '@/utils/ac-localStorage';
 
 const AddEditLap: React.FC = () => {
   const session = useContext(SessionContext);
@@ -121,7 +121,7 @@ const AddEditLap: React.FC = () => {
       if (!success) return;
 
       if (!existingLap && location.pathname.startsWith('/editLap'))
-        window.location.href = '/';
+        router.push('/');
 
       setGame(session.game);
 
