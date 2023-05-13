@@ -1,19 +1,28 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
+import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 // import GoogleLogin, {
 //   GoogleLoginResponse,
 //   GoogleLoginResponseOffline,
 // } from 'react-google-login';
-import { SessionContext } from '@/context/session.context';
+import { StateContext } from '@/context/state.context';
 
 import Image from 'next/image';
 import loginImg from '@/public/login.jpg';
 
 const LoginComponent: React.FC = () => {
+  const state = useContext(StateContext);
+
+  const { data: session } = useSession();
+
   const router = useRouter();
 
-  const session = useContext(SessionContext);
+  useEffect(() => {
+    if (session && session.user) {
+      router.push('/');
+    }
+  }, [session]);
 
   //   const isGoogleLoginResponse = (
   //     response: GoogleLoginResponse | GoogleLoginResponseOffline
@@ -44,13 +53,16 @@ const LoginComponent: React.FC = () => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <div className="login-container">
         <div className="row-flex login-panel">
           <div className="col-2 col-2-a">
             <h1 className="title-line-1">Hit the Track.</h1>
             <h1 className="title-line-2">Make History</h1>
             <div className="google-login-holder">
+              <div>
+                <button onClick={() => signIn()}>Sign In</button>
+              </div>
               {/* TODO Use Next-Auth
                 <GoogleLogin
                   clientId="290608108131-2oik11klmlpt0v1s1909u7pjrhrhon6c.apps.googleusercontent.com"
@@ -67,7 +79,7 @@ const LoginComponent: React.FC = () => {
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

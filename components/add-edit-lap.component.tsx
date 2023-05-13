@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { SessionContext } from '@/context/session.context';
+import { StateContext } from '@/context/state.context';
 import {
   generateSplitToFasterLap,
   generateSplitToSlowerLap,
@@ -15,7 +16,9 @@ import { Car, Lap, Track } from '@/types';
 import { getGameState, setGameState } from '@/utils/ac-localStorage';
 
 const AddEditLap: React.FC = () => {
-  const session = useContext(SessionContext);
+  const state = useContext(StateContext);
+
+  const { data: session } = useSession();
 
   const router = useRouter();
 
@@ -29,8 +32,8 @@ const AddEditLap: React.FC = () => {
     if (rawLap) {
       return rawLap;
     } else if (router.pathname.startsWith('/editLap')) {
-      if (getGameState(session)) {
-        let storedCurrentLap = getGameState(session).currentLapToEdit;
+      if (getGameState(state)) {
+        let storedCurrentLap = getGameState(state).currentLapToEdit;
 
         if (
           storedCurrentLap &&
@@ -60,13 +63,11 @@ const AddEditLap: React.FC = () => {
   const [track, setTrack] = useState(() => {
     return existingLap
       ? existingLap.track
-      : getGameState(session).newLapDefaultTrack;
+      : getGameState(state).newLapDefaultTrack;
   });
 
   const [car, setCar] = useState(() => {
-    return existingLap
-      ? existingLap.car
-      : getGameState(session).newLapDefaultCar;
+    return existingLap ? existingLap.car : getGameState(state).newLapDefaultCar;
   });
 
   const [laptime, setLaptime] = useState(() =>
@@ -74,25 +75,25 @@ const AddEditLap: React.FC = () => {
   );
 
   const [driver] = useState(() =>
-    session ? session?.driver?.name : existingLap ? existingLap.driver : ''
+    state ? state?.driver?.name : existingLap ? existingLap.driver : ''
   );
 
   const [gearbox, setGearbox] = useState(() => {
     return existingLap
       ? existingLap.gearbox
-      : getGameState(session).newLapDefaultGearbox;
+      : getGameState(state).newLapDefaultGearbox;
   });
 
   const [traction, setTraction] = useState(() => {
     return existingLap
       ? existingLap.traction
-      : getGameState(session).newLapDefaultTraction;
+      : getGameState(state).newLapDefaultTraction;
   });
 
   const [stability, setStability] = useState(() => {
     return existingLap
       ? existingLap.stability
-      : getGameState(session).newLapDefaultStability;
+      : getGameState(state).newLapDefaultStability;
   });
 
   const [date, setDate] = useState(() =>
@@ -106,7 +107,7 @@ const AddEditLap: React.FC = () => {
   const [notes, setNotes] = useState(() => {
     return existingLap
       ? existingLap.notes
-      : getGameState(session).newLapDefaultNotes;
+      : getGameState(state).newLapDefaultNotes;
   });
 
   const [splitToFasterLap, setSplitToFasterLap] = useState<string | null>(null);
@@ -115,62 +116,60 @@ const AddEditLap: React.FC = () => {
   useEffect(() => {
     setLoading(true);
 
-    if (!session) return;
+    if (!session || !session.user || !state) {
+      return;
+    }
 
-    session.checkSession().then((success) => {
-      if (!success) return;
+    if (!existingLap && location.pathname.startsWith('/editLap'))
+      router.push('/');
 
-      if (!existingLap && location.pathname.startsWith('/editLap'))
-        router.push('/');
+    setGame(state.game);
 
-      setGame(session.game);
+    axios
+      .get('/laps/' + state.game)
+      .then((res) => {
+        if (res.data.length > 0) {
+          setLaps(res.data);
 
-      axios
-        .get('/laps/' + session.game)
-        .then((res) => {
-          if (res.data.length > 0) {
-            setLaps(res.data);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        console.error('Error [Get Laps]: ' + err);
+      });
 
-            setLoading(false);
-          }
-        })
-        .catch((err) => {
-          console.error('Error [Get Laps]: ' + err);
-        });
+    axios
+      .get('/tracks/' + state.game)
+      .then((res) => {
+        if (res.data.length > 0) {
+          setTracks(res.data.map((t: Track) => t.name));
 
-      axios
-        .get('/tracks/' + session.game)
-        .then((res) => {
-          if (res.data.length > 0) {
-            setTracks(res.data.map((t: Track) => t.name));
+          if (!track) setTrack(res.data[0].name);
+        }
+      })
+      .catch((err) => {
+        console.error('Error [Get Tracks]: ' + err);
+      });
 
-            if (!track) setTrack(res.data[0].name);
-          }
-        })
-        .catch((err) => {
-          console.error('Error [Get Tracks]: ' + err);
-        });
+    axios
+      .get('/cars/' + state.game)
+      .then((res) => {
+        if (res.data.length > 0) {
+          setCars(res.data.map((c: Car) => c.name));
 
-      axios
-        .get('/cars/' + session.game)
-        .then((res) => {
-          if (res.data.length > 0) {
-            setCars(res.data.map((c: Car) => c.name));
+          if (!car) setCar(res.data[0].name);
+        }
+      })
+      .catch((err) => {
+        console.error('Error [Get Cars]: ' + err);
+      });
 
-            if (!car) setCar(res.data[0].name);
-          }
-        })
-        .catch((err) => {
-          console.error('Error [Get Cars]: ' + err);
-        });
-
-      // We are currently editting a lap, NOT creating a new one
-      if (rawLap && location.pathname.startsWith('/editLap'))
-        setGameState(session, {
-          ...getGameState(session),
-          currentLapToEdit: rawLap,
-        });
-    });
+    // We are currently editting a lap, NOT creating a new one
+    if (rawLap && location.pathname.startsWith('/editLap'))
+      setGameState(state, {
+        ...getGameState(state),
+        currentLapToEdit: rawLap,
+      });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -179,7 +178,7 @@ const AddEditLap: React.FC = () => {
   useEffect(() => {
     if (!!game) router.push('/');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.game]);
+  }, [state?.game]);
 
   useEffect(() => {
     setSplitToFasterLap(handleGenerateSplitToFasterLap());
@@ -264,7 +263,7 @@ const AddEditLap: React.FC = () => {
   const buildLap = (): Lap => {
     return {
       _id: existingLap ? existingLap._id : '',
-      game: !existingLap ? session?.game : existingLap.game,
+      game: !existingLap ? state?.game : existingLap.game,
       track: !addTrackInProgress ? track : newTrackName,
       car: !addCarInProgress ? car : newCarName,
       laptime: laptime,
@@ -280,7 +279,7 @@ const AddEditLap: React.FC = () => {
 
   const handleAddNewTrack = (lapToSave: Lap) => {
     axios
-      .post('/tracks/add', { game: session?.game, name: newTrackName })
+      .post('/tracks/add', { game: state?.game, name: newTrackName })
       .then(() => {
         if (addCarInProgress) handleAddNewCar(lapToSave);
         else handleAddOrEditLap(lapToSave);
@@ -291,7 +290,7 @@ const AddEditLap: React.FC = () => {
 
   const handleAddNewCar = (lapToSave: Lap) => {
     axios
-      .post('/cars/add', { game: session?.game, name: newCarName })
+      .post('/cars/add', { game: state?.game, name: newCarName })
       .then(() => handleAddOrEditLap(lapToSave))
       .then(() => setAddCarInProgress(false))
       .catch((err) => console.error('Error [Add Car]: ' + err));
@@ -327,7 +326,7 @@ const AddEditLap: React.FC = () => {
   };
 
   const updateNewLapDefaults = () => {
-    let currentGameState = getGameState(session);
+    let currentGameState = getGameState(state);
 
     currentGameState.newLapDefaultTrack = !addTrackInProgress
       ? track
@@ -338,7 +337,7 @@ const AddEditLap: React.FC = () => {
     currentGameState.newLapDefaultStability = stability;
     currentGameState.newLapDefaultNotes = notes;
 
-    setGameState(session, currentGameState);
+    setGameState(state, currentGameState);
   };
 
   const checkLapRecord = () => {
@@ -381,10 +380,10 @@ const AddEditLap: React.FC = () => {
     );
   };
 
-  if (loading) return <React.Fragment></React.Fragment>;
+  if (loading) return <></>;
 
   return (
-    <React.Fragment>
+    <>
       <div className="ae-page">
         {existingLap ? (
           <h4 className="lap-title">Edit Lap</h4>
@@ -686,7 +685,7 @@ const AddEditLap: React.FC = () => {
           </div>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

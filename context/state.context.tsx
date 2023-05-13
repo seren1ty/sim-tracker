@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import axios from 'axios';
 import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage';
-import { Session } from '@/types';
+import { State } from '@/types';
 
 type ContextProps = {
   children: React.ReactNode;
 };
 
-const SessionContext = React.createContext<Session | null>(null);
+const StateContext = React.createContext<State | null>(null);
 
-const SessionProvider = ({ children }: ContextProps) => {
+const StateProvider = ({ children }: ContextProps) => {
+  const { data: session } = useSession();
+
   const router = useRouter();
 
   const [showMobile, setShowMobile] = useState(false);
@@ -41,21 +43,15 @@ const SessionProvider = ({ children }: ContextProps) => {
     setAcTrackerState({ ...getAcTrackerState(), driver: driver });
   }, [driver]);
 
-  const checkSession = () => {
-    return axios
-      .get('/session/status')
-      .then(() => {
-        return true;
-      })
-      .catch((err) => {
-        console.error('Session expired: ' + err);
-
-        router.push('/login');
-      });
-  };
+  useEffect(() => {
+    if (!session || !session.user) {
+      console.error('Session expired');
+      router.push('/login');
+    }
+  }, [session]);
 
   return (
-    <SessionContext.Provider
+    <StateContext.Provider
       value={{
         showMobile,
         loading,
@@ -67,12 +63,11 @@ const SessionProvider = ({ children }: ContextProps) => {
         setGroup,
         setGame,
         setDriver,
-        checkSession,
       }}
     >
       {children}
-    </SessionContext.Provider>
+    </StateContext.Provider>
   );
 };
 
-export { SessionContext, SessionProvider };
+export { StateContext, StateProvider };

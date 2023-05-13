@@ -33,7 +33,7 @@ const AdminDataAddDriver = (props: AdminDataAddDriverProps) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <div className="data-box add driver">
         <input
           className="data-box-edit-input"
@@ -64,7 +64,7 @@ const AdminDataAddDriver = (props: AdminDataAddDriverProps) => {
           Cancel
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

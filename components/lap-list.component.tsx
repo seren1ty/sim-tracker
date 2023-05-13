@@ -1,9 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { isBefore, isAfter } from 'date-fns';
 import LapItem from './lap-list/lap-item.component';
-import { SessionContext } from '@/context/session.context';
+import { StateContext } from '@/context/state.context';
 import {
   isLapRecord,
   isLapRecordForCar,
@@ -13,7 +14,9 @@ import { Car, Driver, HoveredLap, Lap, Track } from '@/types';
 import { getGameState, setGameState } from '@/utils/ac-localStorage';
 
 const LapList: React.FC = () => {
-  const session = useContext(SessionContext);
+  const state = useContext(StateContext);
+
+  const { data: session } = useSession();
 
   const [originalLaps, setOriginalLaps] = useState([]);
 
@@ -29,74 +32,72 @@ const LapList: React.FC = () => {
   useEffect(() => {
     handleLoadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.group, session?.game]);
+  }, [state?.group, state?.game]);
 
   const handleLoadData = () => {
-    if (!session) return;
+    if (!session || !session.user || !state) {
+      return;
+    }
 
-    session.setLoading(true);
+    state.setLoading(true);
 
-    session.checkSession().then((success) => {
-      if (!success) return;
+    axios
+      .get('/laps/' + state.game)
+      .then((res) => {
+        setOriginalLaps(res.data);
 
-      axios
-        .get('/laps/' + session.game)
-        .then((res) => {
-          setOriginalLaps(res.data);
+        handleSetLaps(res.data);
 
-          handleSetLaps(res.data);
+        state.setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
-          session.setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+    axios
+      .get('/tracks/' + state.game)
+      .then((res) => {
+        handleSetTracks(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
-      axios
-        .get('/tracks/' + session.game)
-        .then((res) => {
-          handleSetTracks(res.data);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+    axios
+      .get('/cars/' + state.game)
+      .then((res) => {
+        handleSetCars(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
 
-      axios
-        .get('/cars/' + session.game)
-        .then((res) => {
-          handleSetCars(res.data);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-
-      axios
-        .get('/drivers')
-        .then((res) => {
-          handleSetDrivers(res.data);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    });
+    axios
+      .get('/drivers')
+      .then((res) => {
+        handleSetDrivers(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   const handleSetLaps = (newLaps: Lap[]) => {
-    let sortedLaps = handleChangeSort(getGameState(session).sortType, newLaps);
+    let sortedLaps = handleChangeSort(getGameState(state).sortType, newLaps);
 
-    if (getGameState(session).trackType !== 'ALL')
+    if (getGameState(state).trackType !== 'ALL')
       sortedLaps = sortedLaps.filter(
-        (lap: Lap) => lap.track === getGameState(session).trackType
+        (lap: Lap) => lap.track === getGameState(state).trackType
       );
 
-    if (getGameState(session).carType !== 'ALL')
+    if (getGameState(state).carType !== 'ALL')
       sortedLaps = sortedLaps.filter(
-        (lap: Lap) => lap.car === getGameState(session).carType
+        (lap: Lap) => lap.car === getGameState(state).carType
       );
 
-    if (getGameState(session).driverType !== 'ALL')
+    if (getGameState(state).driverType !== 'ALL')
       sortedLaps = sortedLaps.filter(
-        (lap: Lap) => lap.driver === getGameState(session).driverType
+        (lap: Lap) => lap.driver === getGameState(state).driverType
       );
 
     setLaps(sortedLaps);
@@ -133,8 +134,8 @@ const LapList: React.FC = () => {
   const onChangeTrack = (trackEvent: React.ChangeEvent<HTMLSelectElement>) => {
     handleChangeTrack(trackEvent.target.value);
 
-    setGameState(session, {
-      ...getGameState(session),
+    setGameState(state, {
+      ...getGameState(state),
       trackType: trackEvent.target.value,
     });
   };
@@ -144,19 +145,16 @@ const LapList: React.FC = () => {
 
     filteredLaps = [...originalLaps];
 
-    filteredLaps = handleChangeSort(
-      getGameState(session).sortType,
-      filteredLaps
-    );
+    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps);
 
-    if (getGameState(session).driverType !== 'ALL')
+    if (getGameState(state).driverType !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.driver === getGameState(session).driverType
+        (lap: Lap) => lap.driver === getGameState(state).driverType
       );
 
-    if (getGameState(session).carType !== 'ALL')
+    if (getGameState(state).carType !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.car === getGameState(session).carType
+        (lap: Lap) => lap.car === getGameState(state).carType
       );
 
     if (newTrackType !== 'ALL')
@@ -170,8 +168,8 @@ const LapList: React.FC = () => {
   const onChangeCar = (carEvent: React.ChangeEvent<HTMLSelectElement>) => {
     handleChangeCar(carEvent.target.value);
 
-    setGameState(session, {
-      ...getGameState(session),
+    setGameState(state, {
+      ...getGameState(state),
       carType: carEvent.target.value,
     });
   };
@@ -181,19 +179,16 @@ const LapList: React.FC = () => {
 
     filteredLaps = [...originalLaps];
 
-    filteredLaps = handleChangeSort(
-      getGameState(session).sortType,
-      filteredLaps
-    );
+    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps);
 
-    if (getGameState(session).trackType !== 'ALL')
+    if (getGameState(state).trackType !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.track === getGameState(session).trackType
+        (lap: Lap) => lap.track === getGameState(state).trackType
       );
 
-    if (getGameState(session).driverType !== 'ALL')
+    if (getGameState(state).driverType !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.driver === getGameState(session).driverType
+        (lap: Lap) => lap.driver === getGameState(state).driverType
       );
 
     if (newCarType !== 'ALL')
@@ -207,8 +202,8 @@ const LapList: React.FC = () => {
   ) => {
     handleChangeDriver(driverEvent.target.value);
 
-    setGameState(session, {
-      ...getGameState(session),
+    setGameState(state, {
+      ...getGameState(state),
       driverType: driverEvent.target.value,
     });
   };
@@ -218,19 +213,16 @@ const LapList: React.FC = () => {
 
     filteredLaps = [...originalLaps];
 
-    filteredLaps = handleChangeSort(
-      getGameState(session).sortType,
-      filteredLaps
-    );
+    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps);
 
-    if (getGameState(session).trackType !== 'ALL')
+    if (getGameState(state).trackType !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.track === getGameState(session).trackType
+        (lap: Lap) => lap.track === getGameState(state).trackType
       );
 
-    if (getGameState(session).carType !== 'ALL')
+    if (getGameState(state).carType !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.car === getGameState(session).carType
+        (lap: Lap) => lap.car === getGameState(state).carType
       );
 
     if (newDriverType !== 'ALL')
@@ -242,8 +234,8 @@ const LapList: React.FC = () => {
   };
 
   const onChangeSort = (sortEvent: React.ChangeEvent<HTMLSelectElement>) => {
-    setGameState(session, {
-      ...getGameState(session),
+    setGameState(state, {
+      ...getGameState(state),
       sortType: sortEvent.target.value,
     });
 
@@ -336,18 +328,18 @@ const LapList: React.FC = () => {
     setHoveredLap(currHoveredLap);
   };
 
-  if (!session || session.loading) {
+  if (!state || state.loading) {
     return (
-      <React.Fragment>
+      <>
         <div className="mt-2 ml-2">
           <strong>Loading your lap records...</strong>
         </div>
-      </React.Fragment>
+      </>
     );
   }
 
   return (
-    <React.Fragment>
+    <>
       <div className="lap-list-page">
         <div className="lap-title-row">
           <span className="lap-title">Lap Records</span>
@@ -366,7 +358,7 @@ const LapList: React.FC = () => {
             <select
               className="lap-filter-select"
               onChange={onChangeTrack}
-              value={getGameState(session).trackType}
+              value={getGameState(state).trackType}
             >
               <option value="ALL">All Tracks</option>
               {tracks.map((track) => {
@@ -382,7 +374,7 @@ const LapList: React.FC = () => {
             <select
               className="lap-filter-select"
               onChange={onChangeCar}
-              value={getGameState(session).carType}
+              value={getGameState(state).carType}
             >
               <option value="ALL">All Cars</option>
               {cars.map((car) => {
@@ -398,7 +390,7 @@ const LapList: React.FC = () => {
             <select
               className="lap-filter-select"
               onChange={onChangeDriver}
-              value={getGameState(session).driverType}
+              value={getGameState(state).driverType}
             >
               <option value="ALL">All Drivers</option>
               {drivers.map((driver) => {
@@ -415,7 +407,7 @@ const LapList: React.FC = () => {
             <select
               className="lap-filter-select"
               onChange={onChangeSort}
-              value={getGameState(session).sortType}
+              value={getGameState(state).sortType}
             >
               <option value="DATE">Date</option>
               <option value="TRACK">Track</option>
@@ -465,7 +457,7 @@ const LapList: React.FC = () => {
           </tbody>
         </table>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

@@ -1,17 +1,21 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { Tooltip } from 'react-tooltip';
-import { SessionContext } from '@/context/session.context';
+import { StateContext } from '@/context/state.context';
 import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage';
 import { Game, Group } from '@/types';
 import Image from 'next/image';
 import logoutImg from '@/public/logout_blue.png';
+import adminImg from '@/public/settings_blue.png';
 
 const Navbar = () => {
+  const { data: session } = useSession();
+
   const router = useRouter();
 
-  const session = useContext(SessionContext);
+  const state = useContext(StateContext);
 
   const [groups, setGroups] = useState<Group[] | null>(null);
   const [games, setGames] = useState<Game[] | null>(null);
@@ -21,7 +25,7 @@ const Navbar = () => {
     }); */
 
   const [game, setGame] = useState(() => {
-    return session?.game ? session.game : 'Assetto Corsa';
+    return state?.game ? state.game : 'Assetto Corsa';
   });
 
   useEffect(() => {
@@ -35,12 +39,12 @@ const Navbar = () => {
       if (!games) initGames();
     }, 2000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.driver]);
+  }, [state?.driver]);
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 390) {
-        session?.setShowMobile(true);
+        state?.setShowMobile(true);
       }
     };
 
@@ -53,37 +57,33 @@ const Navbar = () => {
   }, []);
 
   const initGroups = () => {
-    if (!session) return;
+    if (!session || !session.user) {
+      return;
+    }
 
-    session.checkSession().then((success) => {
-      if (!success) return;
-
-      axios
-        .get('/groups')
-        .then((res) => {
-          setGroups(res.data);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    });
+    axios
+      .get('/groups')
+      .then((res) => {
+        setGroups(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   const initGames = () => {
-    if (!session) return;
+    if (!session || !session.user) {
+      return;
+    }
 
-    session.checkSession().then((success) => {
-      if (!success) return;
-
-      axios
-        .get('/games')
-        .then((res) => {
-          setGames(res.data);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
-    });
+    axios
+      .get('/games')
+      .then((res) => {
+        setGames(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   const openAdmin = () => {
@@ -101,17 +101,15 @@ const Navbar = () => {
   const onChangeGame = (gameEvent: React.ChangeEvent<HTMLSelectElement>) => {
     setGame(gameEvent.target.value);
 
-    session?.setGame(gameEvent.target.value);
+    state?.setGame(gameEvent.target.value);
 
     setAcTrackerState({ ...getAcTrackerState(), game: gameEvent.target.value });
   };
 
-  const logout = () => {
-    axios.post('/session/logout').then(() => {
-      session?.setDriver(null);
+  const logout = async () => {
+    await signOut();
 
-      router.push('/login');
-    });
+    state?.setDriver(null);
   };
 
   if (router.pathname.startsWith('/login')) {
@@ -130,7 +128,7 @@ const Navbar = () => {
         </a>
       </div>
       <div className="banner-right">
-        {!!session && session?.driver?.isAdmin && (
+        {!!state && state?.driver?.isAdmin && (
           <span>
             <button
               className="nav-link nav-item btn btn-link"
@@ -139,7 +137,7 @@ const Navbar = () => {
               onClick={openAdmin}
             >
               <Image
-                src="/settings_blue.png"
+                src={adminImg}
                 alt="admin"
                 className="settings-icon"
                 priority
@@ -154,7 +152,7 @@ const Navbar = () => {
               games.map((game: Game) => {
                 return (
                   <option key={game._id} value={game.name}>
-                    {session?.showMobile ? game.code : game.name}
+                    {state?.showMobile ? game.code : game.name}
                   </option>
                 );
               })}

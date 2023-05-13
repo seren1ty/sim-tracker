@@ -78,15 +78,15 @@ const AdminDataBoxes = (props: AdminDataProps) => {
 
   if (!props.showAdd && (!props.data || props.data.length === 0))
     return (
-      <React.Fragment>
+      <>
         <div className="mt-2 ml-2">
           <strong>No data found.</strong>
         </div>
-      </React.Fragment>
+      </>
     );
 
   return (
-    <React.Fragment>
+    <>
       {props.data?.map((dataItem, index) => {
         return (
           <div key={dataItem._id}>
@@ -177,7 +177,7 @@ const AdminDataBoxes = (props: AdminDataProps) => {
           </div>
         );
       })}
-    </React.Fragment>
+    </>
   );
 };
 

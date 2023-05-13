@@ -23,7 +23,7 @@ const AdminDataAdd = (props: AdminDataAddProps) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <div className="data-box add">
         <input
           className="data-box-edit-input"
@@ -39,7 +39,7 @@ const AdminDataAdd = (props: AdminDataAddProps) => {
           Cancel
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

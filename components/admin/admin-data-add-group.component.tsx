@@ -47,7 +47,7 @@ const AdminDataAddGroup = (props: AdminDataAddGroupProps) => {
   };
 
   return (
-    <React.Fragment>
+    <>
       <div className="data-box add group">
         <input
           className="data-box-edit-input"
@@ -92,7 +92,7 @@ const AdminDataAddGroup = (props: AdminDataAddGroupProps) => {
           Cancel
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

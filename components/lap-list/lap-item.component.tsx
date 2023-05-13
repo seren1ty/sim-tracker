@@ -2,12 +2,14 @@ import React, { useContext, useState, useEffect } from 'react';
 import AcDate from '@/components/common/ac-date.component';
 import Truncator from '@/components/common/truncator.component';
 import { Tooltip } from 'react-tooltip';
-import { SessionContext } from '@/context/session.context';
+import { StateContext } from '@/context/state.context';
 import Laptime from '@/components/common/laptime.component';
 import LapActions from './lap-actions.component';
 import { HoveredLap, Lap } from '@/types';
 import { getGameState } from '@/utils/ac-localStorage';
 import Image from 'next/image';
+import replayImg from '@/public/replay_blue.png';
+import notesImg from '@/public/notes_blue.png';
 
 type LapItemProps = {
   lap: Lap;
@@ -37,18 +39,18 @@ const LapItem = (props: LapItemProps) => {
     // eslint-disable-next-line
   }, [props.hoveredLap]);
 
-  const session = useContext(SessionContext);
+  const state = useContext(StateContext);
 
   const highlightDriversLap = () => {
     return shownLapsAreNotLimitedToCurrentDriver() && lapIsForCurrentDriver();
   };
 
   const shownLapsAreNotLimitedToCurrentDriver = () => {
-    return getGameState(session).driverType !== lap.driver;
+    return getGameState(state).driverType !== lap.driver;
   };
 
   const lapIsForCurrentDriver = () => {
-    return !!session ? session.driver?.name === lap.driver : false;
+    return !!state ? state.driver?.name === lap.driver : false;
   };
 
   const isLapDataHovered = (type: string, data: string) => {
@@ -60,7 +62,7 @@ const LapItem = (props: LapItemProps) => {
   };
 
   const enabledMobileReplay = () => {
-    return lap.replay && session?.showMobile;
+    return lap.replay && state?.showMobile;
   };
 
   const onClickLapRow = () => {
@@ -106,7 +108,7 @@ const LapItem = (props: LapItemProps) => {
               data-for={'replay_' + lap._id}
             >
               <Image
-                src="/replay_blue.png"
+                src={replayImg}
                 alt="replay"
                 className="lap-replay-icon"
                 priority
@@ -133,7 +135,7 @@ const LapItem = (props: LapItemProps) => {
           <span>
             <span data-tip={lap.notes} data-for={'notes_' + lap._id}>
               <Image
-                src="/notes_blue.png"
+                src={notesImg}
                 alt="notes"
                 className="lap-notes-icon"
                 priority
@@ -145,7 +147,7 @@ const LapItem = (props: LapItemProps) => {
       </td>
       <td className="lap-row-actions sub-item">
         <LapActions
-          sessionDriver={session?.driver}
+          sessionDriver={state?.driver}
           lap={lap}
           deleteLap={props.deleteLap}
         />

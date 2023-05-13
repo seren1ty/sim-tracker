@@ -1,5 +1,5 @@
 import { AcTrackerState, AcTrackerGameState } from '@/types';
-import { Session } from '@/types';
+import { State } from '@/types';
 
 const getItem = (key: string) => {
   const item =
@@ -38,12 +38,12 @@ export const setAcTrackerState = (state: AcTrackerState): void => {
   setItem('acTracker', state);
 };
 
-export const getGameState = (session: Session | null) => {
+export const getGameState = (session: State | null) => {
   return getAcTrackerGameState(session?.group, session?.game);
 };
 
 export const setGameState = (
-  session: Session | null,
+  session: State | null,
   state: AcTrackerGameState
 ) => {
   setAcTrackerGameState(session?.group, session?.game, state);
