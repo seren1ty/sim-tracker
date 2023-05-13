@@ -9,6 +9,7 @@ import { Game, Group } from '@/types';
 import Image from 'next/image';
 import logoutImg from '@/public/logout_blue.png';
 import adminImg from '@/public/settings_blue.png';
+import Link from 'next/link';
 
 const Navbar = () => {
   const { data: session } = useSession();
@@ -123,9 +124,9 @@ const Navbar = () => {
   return (
     <nav className="banner">
       <div>
-        <a className="nav-title" href="/">
+        <Link className="nav-title" href="/">
           AC Tracker
-        </a>
+        </Link>
       </div>
       <div className="banner-right">
         {!!state && state?.driver?.isAdmin && (

@@ -14,6 +14,7 @@ import {
 } from '@/utils/laptime.utils';
 import { Car, Lap, Track } from '@/types';
 import { getGameState, setGameState } from '@/utils/ac-localStorage';
+import Link from 'next/link';
 
 const AddEditLap: React.FC = () => {
   const state = useContext(StateContext);
@@ -617,7 +618,7 @@ const AddEditLap: React.FC = () => {
                   disabled={submitClicked}
                   value={existingLap ? 'Update Lap' : 'Add New Lap'}
                 />
-                <a href="/">Cancel</a>
+                <Link href="/">Cancel</Link>
               </div>
             </form>
           </div>

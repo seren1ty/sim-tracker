@@ -22,7 +22,7 @@ const LoginComponent: React.FC = () => {
     if (session && session.user) {
       router.push('/');
     }
-  }, [session]);
+  }, [session, router]);
 
   //   const isGoogleLoginResponse = (
   //     response: GoogleLoginResponse | GoogleLoginResponseOffline
