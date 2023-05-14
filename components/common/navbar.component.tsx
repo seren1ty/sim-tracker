@@ -63,7 +63,7 @@ const Navbar = () => {
     }
 
     axios
-      .get('/groups')
+      .get('/api/groups')
       .then((res) => {
         setGroups(res.data);
       })
@@ -78,7 +78,7 @@ const Navbar = () => {
     }
 
     axios
-      .get('/games')
+      .get('/api/games')
       .then((res) => {
         setGames(res.data);
       })

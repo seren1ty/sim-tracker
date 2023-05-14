@@ -127,7 +127,7 @@ const AddEditLap: React.FC = () => {
     setGame(state.game);
 
     axios
-      .get('/laps/' + state.game)
+      .get('/api/laps/' + state.game)
       .then((res) => {
         if (res.data.length > 0) {
           setLaps(res.data);
@@ -140,7 +140,7 @@ const AddEditLap: React.FC = () => {
       });
 
     axios
-      .get('/tracks/' + state.game)
+      .get('/api/tracks/' + state.game)
       .then((res) => {
         if (res.data.length > 0) {
           setTracks(res.data.map((t: Track) => t.name));
@@ -153,7 +153,7 @@ const AddEditLap: React.FC = () => {
       });
 
     axios
-      .get('/cars/' + state.game)
+      .get('/api/cars/' + state.game)
       .then((res) => {
         if (res.data.length > 0) {
           setCars(res.data.map((c: Car) => c.name));
@@ -280,7 +280,7 @@ const AddEditLap: React.FC = () => {
 
   const handleAddNewTrack = (lapToSave: Lap) => {
     axios
-      .post('/tracks/add', { game: state?.game, name: newTrackName })
+      .post('/api/tracks/add', { game: state?.game, name: newTrackName })
       .then(() => {
         if (addCarInProgress) handleAddNewCar(lapToSave);
         else handleAddOrEditLap(lapToSave);
@@ -291,7 +291,7 @@ const AddEditLap: React.FC = () => {
 
   const handleAddNewCar = (lapToSave: Lap) => {
     axios
-      .post('/cars/add', { game: state?.game, name: newCarName })
+      .post('/api/cars/add', { game: state?.game, name: newCarName })
       .then(() => handleAddOrEditLap(lapToSave))
       .then(() => setAddCarInProgress(false))
       .catch((err) => console.error('Error [Add Car]: ' + err));
@@ -304,7 +304,7 @@ const AddEditLap: React.FC = () => {
 
   const addLap = (lapToSave: Lap) => {
     axios
-      .post('/laps/add', lapToSave)
+      .post('/api/laps/add', lapToSave)
       .then((res) => {
         updateNewLapDefaults();
 
@@ -317,7 +317,7 @@ const AddEditLap: React.FC = () => {
 
   const editLap = (lapToSave: Lap) => {
     axios
-      .put('/laps/edit/' + existingLap._id, lapToSave)
+      .put('/api/laps/edit/' + existingLap._id, lapToSave)
       .then((res) => {
         router.push('/');
       })

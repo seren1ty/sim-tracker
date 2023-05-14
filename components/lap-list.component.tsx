@@ -42,7 +42,7 @@ const LapList: React.FC = () => {
     state.setLoading(true);
 
     axios
-      .get('/laps/' + state.game)
+      .get('/api/laps/' + state.game)
       .then((res) => {
         setOriginalLaps(res.data);
 
@@ -55,7 +55,7 @@ const LapList: React.FC = () => {
       });
 
     axios
-      .get('/tracks/' + state.game)
+      .get('/api/tracks/' + state.game)
       .then((res) => {
         handleSetTracks(res.data);
       })
@@ -64,7 +64,7 @@ const LapList: React.FC = () => {
       });
 
     axios
-      .get('/cars/' + state.game)
+      .get('/api/cars/' + state.game)
       .then((res) => {
         handleSetCars(res.data);
       })
@@ -73,7 +73,7 @@ const LapList: React.FC = () => {
       });
 
     axios
-      .get('/drivers')
+      .get('/api/drivers')
       .then((res) => {
         handleSetDrivers(res.data);
       })
@@ -311,7 +311,7 @@ const LapList: React.FC = () => {
 
   const deleteLap = (id: string) => {
     axios
-      .delete('/laps/delete/' + id)
+      .delete('/api/laps/delete/' + id)
       .then((res) => {
         setLaps(laps.filter((lap: Lap) => lap._id !== id));
 

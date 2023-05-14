@@ -41,7 +41,7 @@ const Admin = () => {
     state.setLoading(true);
 
     axios
-      .get('/tracks/lapCheck/' + state.game)
+      .get('/api/tracks/lapCheck/' + state.game)
       .then((res) => {
         setTracks(res.data);
       })
@@ -61,7 +61,7 @@ const Admin = () => {
     state.setLoading(true);
 
     axios
-      .get('/cars/lapCheck/' + state.game)
+      .get('/api/cars/lapCheck/' + state.game)
       .then((res) => {
         setCars(res.data);
       })
@@ -81,7 +81,7 @@ const Admin = () => {
     state.setLoading(true);
 
     axios
-      .get('/drivers/lapCheck')
+      .get('/api/drivers/lapCheck')
       .then((res) => {
         setDrivers(res.data);
       })
@@ -100,7 +100,7 @@ const Admin = () => {
 
     state.setLoading(true);
     axios
-      .get('/games/lapCheck')
+      .get('/api/games/lapCheck')
       .then((res) => {
         setGames(res.data);
       })
@@ -120,7 +120,7 @@ const Admin = () => {
     state.setLoading(true);
 
     axios
-      .get('/groups')
+      .get('/api/groups')
       .then((res) => {
         setGroups(res.data);
       })
@@ -297,7 +297,7 @@ const Admin = () => {
 
   const performAdd = (cmdType: string, request: any) => {
     return axios
-      .post('/' + cmdType + 's/add', request)
+      .post('/api/' + cmdType + 's/add', request)
       .then((result) => {
         setShowAdd(false);
 
@@ -332,7 +332,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/tracks/delete/' + track._id)
+      .delete('/api/tracks/delete/' + track._id)
       .then((res) => {
         const updatedTracks = tracks.filter(
           (currTrack: Track) => currTrack._id !== res.data._id
@@ -354,7 +354,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/cars/delete/' + car._id)
+      .delete('/api/cars/delete/' + car._id)
       .then((res) => {
         const updatedCars = cars.filter(
           (currCar: Car) => currCar._id !== res.data._id
@@ -376,7 +376,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/drivers/delete/' + driver._id)
+      .delete('/api/drivers/delete/' + driver._id)
       .then((res) => {
         const updatedDrivers = drivers.filter(
           (currDriver: Driver) => currDriver._id !== res.data._id
@@ -398,7 +398,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/games/delete/' + game._id)
+      .delete('/api/games/delete/' + game._id)
       .then((res) => {
         const updatedGames = games.filter(
           (currGame: Game) => currGame._id !== res.data._id
@@ -418,7 +418,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/groups/delete/' + group._id)
+      .delete('/api/groups/delete/' + group._id)
       .then((res) => {
         const updatedGroups = groups.filter(
           (currGroup: Group) => currGroup._id !== res.data._id
