@@ -23,7 +23,7 @@ export default NextAuth({
               isAdmin: driver.isAdmin,
             };
           } else {
-            console.log('Error [Driver Not Setup]: ' + token.email);
+            console.error('Error [Driver Not Setup]: ' + token.email);
             /* Do not support New Users at the moment
                 const newDriver = new Driver({ name, email });
 
@@ -33,7 +33,7 @@ export default NextAuth({
           }
         })
         .catch((err) => {
-          console.log('Error [Get Driver]: ' + err);
+          console.error('Error [Get Driver]: ' + err);
         });
 
       return token;

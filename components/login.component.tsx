@@ -8,7 +8,7 @@ const LoginComponent: React.FC = () => {
   const { status } = useSession();
 
   const handleSignIn = async () => {
-    signIn('google', { redirect: false });
+    signIn('google');
   };
 
   if (status === 'authenticated' || status === 'loading') {

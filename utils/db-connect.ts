@@ -9,7 +9,7 @@ const dbConnect = () => {
   if (!global.mongoose) {
     global.mongoose = mongoose
       .connect(process.env.MONGODB_URI as string, {})
-      .catch((err) => console.log(err))
+      .catch((err) => console.error(err))
       .then((con) => console.log('Connected to MongoDB'));
   }
 

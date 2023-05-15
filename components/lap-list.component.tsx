@@ -30,7 +30,6 @@ const LapList: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    console.log(`==== lap-list: game: ${state?.game}`);
     handleLoadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, state?.group, state?.game]);
