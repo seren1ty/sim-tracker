@@ -6,15 +6,18 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { method } = req;
+  const {
+    query: { id },
+    method,
+  } = req;
 
   await dbConnect();
 
   switch (method) {
-    case 'GET': // Get all laps
-      Lap.find()
-        .then((laps) => res.json(laps))
-        .catch((err) => res.status(400).json('Error [Get All Laps]: ' + err));
+    case 'GET' /* Get lap by id */:
+      Lap.findById(id)
+        .then((lap) => res.json(lap))
+        .catch((err) => res.status(400).json('Error [Get Lap]: ' + err));
       break;
 
     default:

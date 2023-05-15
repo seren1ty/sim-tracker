@@ -14,7 +14,7 @@ export default async function handler(
   await dbConnect();
 
   switch (method) {
-    case 'GET' /* Get a model by its ID */:
+    case 'GET' /* Get all laps for a specific game */:
       Lap.find({ game: game })
         .collation({ locale: 'en', strength: 2 })
         .sort({ name: 1 })

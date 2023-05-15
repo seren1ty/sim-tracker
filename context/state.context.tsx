@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage';
 import { State } from '@/types';
+import axios from 'axios';
 
 type ContextProps = {
   children: React.ReactNode;
@@ -11,7 +12,7 @@ type ContextProps = {
 const StateContext = React.createContext<State | null>(null);
 
 const StateProvider = ({ children }: ContextProps) => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const router = useRouter();
 
@@ -43,12 +44,25 @@ const StateProvider = ({ children }: ContextProps) => {
     setAcTrackerState({ ...getAcTrackerState(), driver: driver });
   }, [driver]);
 
+  // Detect end of session and redirect to login
   useEffect(() => {
-    if (!session || !session.user) {
+    if (status !== 'authenticated' && status !== 'loading' && !session) {
       console.error('Session expired');
       router.push('/login');
     }
   }, [session]);
+
+  // Detect new session redirect to main page
+  useEffect(() => {
+    (async () => {
+      if (status === 'authenticated') {
+        const res = await axios.get('/api/drivers/' + session?.user?.email);
+        setDriver(res.data);
+
+        router.push('/');
+      }
+    })();
+  }, [status]);
 
   return (
     <StateContext.Provider

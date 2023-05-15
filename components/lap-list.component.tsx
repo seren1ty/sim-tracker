@@ -16,7 +16,7 @@ import { getGameState, setGameState } from '@/utils/ac-localStorage';
 const LapList: React.FC = () => {
   const state = useContext(StateContext);
 
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
 
   const [originalLaps, setOriginalLaps] = useState([]);
 
@@ -30,9 +30,10 @@ const LapList: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
+    console.log(`==== lap-list: game: ${state?.game}`);
     handleLoadData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.group, state?.game]);
+  }, [status, state?.group, state?.game]);
 
   const handleLoadData = () => {
     if (!session || !session.user || !state) {
@@ -42,7 +43,7 @@ const LapList: React.FC = () => {
     state.setLoading(true);
 
     axios
-      .get('/api/laps/' + state.game)
+      .get('/api/laps/game/' + state.game)
       .then((res) => {
         setOriginalLaps(res.data);
 
@@ -55,7 +56,7 @@ const LapList: React.FC = () => {
       });
 
     axios
-      .get('/api/tracks/' + state.game)
+      .get('/api/tracks/game/' + state.game)
       .then((res) => {
         handleSetTracks(res.data);
       })
@@ -64,7 +65,7 @@ const LapList: React.FC = () => {
       });
 
     axios
-      .get('/api/cars/' + state.game)
+      .get('/api/cars/game/' + state.game)
       .then((res) => {
         handleSetCars(res.data);
       })

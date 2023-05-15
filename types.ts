@@ -33,6 +33,11 @@ export type State = {
   setDriver: (driver: Driver | null) => void;
 };
 
+type MongooseDocument<T> = {
+  _doc: T;
+};
+
+export type LapDocument = MongooseDocument<Lap> & Lap;
 export type Lap = {
   _id: string;
   game: string;
@@ -59,6 +64,7 @@ export type HoveredLap = {
   data: string;
 };
 
+export type TrackDocument = MongooseDocument<Track> & Track;
 export type Track = {
   _id: string;
   game: string;
@@ -66,6 +72,7 @@ export type Track = {
   hasLaps?: boolean;
 };
 
+export type CarDocument = MongooseDocument<Car> & Car;
 export type Car = {
   _id: string;
   game: string;
@@ -73,6 +80,7 @@ export type Car = {
   hasLaps?: boolean;
 };
 
+export type DriverDocument = MongooseDocument<Driver> & Driver;
 export type Driver = {
   _id: string;
   name: string;
@@ -87,6 +95,7 @@ export type NewDriver = {
   isAdmin?: boolean;
 };
 
+export type GameDocument = MongooseDocument<Game> & Game;
 export type Game = {
   _id: string;
   name: string;
@@ -94,6 +103,7 @@ export type Game = {
   hasLaps?: boolean;
 };
 
+export type GroupDocument = MongooseDocument<Group> & Group;
 export type Group = {
   _id: string;
   name: string;

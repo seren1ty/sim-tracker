@@ -127,7 +127,7 @@ const AddEditLap: React.FC = () => {
     setGame(state.game);
 
     axios
-      .get('/api/laps/' + state.game)
+      .get('/api/laps/game/' + state.game)
       .then((res) => {
         if (res.data.length > 0) {
           setLaps(res.data);
@@ -140,7 +140,7 @@ const AddEditLap: React.FC = () => {
       });
 
     axios
-      .get('/api/tracks/' + state.game)
+      .get('/api/tracks/game/' + state.game)
       .then((res) => {
         if (res.data.length > 0) {
           setTracks(res.data.map((t: Track) => t.name));
@@ -153,7 +153,7 @@ const AddEditLap: React.FC = () => {
       });
 
     axios
-      .get('/api/cars/' + state.game)
+      .get('/api/cars/game/' + state.game)
       .then((res) => {
         if (res.data.length > 0) {
           setCars(res.data.map((c: Car) => c.name));

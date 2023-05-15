@@ -41,7 +41,7 @@ const Admin = () => {
     state.setLoading(true);
 
     axios
-      .get('/api/tracks/lapCheck/' + state.game)
+      .get(`/api/tracks/game/${state.game}/lap-check`)
       .then((res) => {
         setTracks(res.data);
       })
@@ -61,7 +61,7 @@ const Admin = () => {
     state.setLoading(true);
 
     axios
-      .get('/api/cars/lapCheck/' + state.game)
+      .get(`/api/cars/game/${state.game}/lap-check`)
       .then((res) => {
         setCars(res.data);
       })
@@ -81,7 +81,7 @@ const Admin = () => {
     state.setLoading(true);
 
     axios
-      .get('/api/drivers/lapCheck')
+      .get('/api/drivers/lap-check')
       .then((res) => {
         setDrivers(res.data);
       })
@@ -100,7 +100,7 @@ const Admin = () => {
 
     state.setLoading(true);
     axios
-      .get('/api/games/lapCheck')
+      .get('/api/games/lap-check')
       .then((res) => {
         setGames(res.data);
       })

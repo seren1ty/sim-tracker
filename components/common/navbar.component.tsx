@@ -30,12 +30,12 @@ const Navbar = () => {
   });
 
   useEffect(() => {
-    initGroups();
+    //initGroups();
     initGames();
 
     // Backup check for mobile blocking initial request
     setTimeout(() => {
-      if (!groups) initGroups();
+      //if (!groups) initGroups();
 
       if (!games) initGames();
     }, 2000);
@@ -66,6 +66,10 @@ const Navbar = () => {
       .get('/api/groups')
       .then((res) => {
         setGroups(res.data);
+
+        if (!state?.group && !!res.data.length) {
+          state?.setGroup(res.data[0].name);
+        }
       })
       .catch((err) => {
         console.error(err);
@@ -81,6 +85,10 @@ const Navbar = () => {
       .get('/api/games')
       .then((res) => {
         setGames(res.data);
+
+        if (!state?.game && !!res.data.length) {
+          state?.setGame(res.data[0].name);
+        }
       })
       .catch((err) => {
         console.error(err);
@@ -125,7 +133,7 @@ const Navbar = () => {
     <nav className="banner">
       <div>
         <Link className="nav-title" href="/">
-          AC Tracker
+          SimTracker
         </Link>
       </div>
       <div className="banner-right">
