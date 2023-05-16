@@ -9,6 +9,7 @@ import AdminDataAddGroup from './admin/admin-data-add-group.component';
 import AdminDataBoxes from './admin/admin-data-boxes.component';
 import { Car, Driver, Game, Group, NewDriver, NewGroup, Track } from '@/types';
 import Image from 'next/image';
+import addIconImg from '@/public/add_blue.png';
 
 const Admin = () => {
   const state = useContext(StateContext);
@@ -456,8 +457,8 @@ const Admin = () => {
               onClick={onClickAdd}
             >
               <Image
-                src="/add_blue.png"
-                alt="admin"
+                src={addIconImg}
+                alt="add-icon"
                 className="add-icon"
                 priority
               />
