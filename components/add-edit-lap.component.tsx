@@ -280,7 +280,7 @@ const AddEditLap: React.FC = () => {
 
   const handleAddNewTrack = (lapToSave: Lap) => {
     axios
-      .post('/api/tracks/add', { game: state?.game, name: newTrackName })
+      .post('/api/tracks', { game: state?.game, name: newTrackName })
       .then(() => {
         if (addCarInProgress) handleAddNewCar(lapToSave);
         else handleAddOrEditLap(lapToSave);
@@ -291,7 +291,7 @@ const AddEditLap: React.FC = () => {
 
   const handleAddNewCar = (lapToSave: Lap) => {
     axios
-      .post('/api/cars/add', { game: state?.game, name: newCarName })
+      .post('/api/cars', { game: state?.game, name: newCarName })
       .then(() => handleAddOrEditLap(lapToSave))
       .then(() => setAddCarInProgress(false))
       .catch((err) => console.error('Error [Add Car]: ' + err));
@@ -304,7 +304,7 @@ const AddEditLap: React.FC = () => {
 
   const addLap = (lapToSave: Lap) => {
     axios
-      .post('/api/laps/add', lapToSave)
+      .post('/api/laps', lapToSave)
       .then((res) => {
         updateNewLapDefaults();
 

@@ -1,6 +1,7 @@
 import dbConnect from '@/utils/db-connect';
 import Car from '@/models/car.model';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { CarDocument } from '@/types';
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,6 +18,18 @@ export default async function handler(
         .sort({ name: 1 })
         .then((cars) => res.json(cars))
         .catch((err) => res.status(400).json('Error [Get All Cars]: ' + err));
+      break;
+
+    case 'POST': // Add new car
+      const game = req.body.game;
+      const name = req.body.name;
+
+      const newCar = new Car({ game, name });
+
+      newCar
+        .save()
+        .then((car: CarDocument) => res.json(car))
+        .catch((err: Error) => res.status(400).json('Error [Add Car]: ' + err));
       break;
 
     default:

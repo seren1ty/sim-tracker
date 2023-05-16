@@ -297,7 +297,7 @@ const Admin = () => {
 
   const performAdd = (cmdType: string, request: any) => {
     return axios
-      .post('/api/' + cmdType + 's/add', request)
+      .post('/api/' + cmdType + 's', request)
       .then((result) => {
         setShowAdd(false);
 

@@ -1,6 +1,7 @@
 import dbConnect from '@/utils/db-connect';
 import Driver from '@/models/driver.model';
 import { NextApiRequest, NextApiResponse } from 'next';
+import { DriverDocument } from '@/types';
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,6 +21,20 @@ export default async function handler(
           res.status(400).json('Error [Get All Drivers]: ' + err)
         );
       break;
+
+    case 'POST':
+      const name = req.body.name;
+      const email = req.body.email;
+      const isAdmin = req.body.isAdmin;
+
+      const newDriver = new Driver({ name, email, isAdmin });
+
+      newDriver
+        .save()
+        .then((driver: DriverDocument) => res.json(driver))
+        .catch((err: Error) =>
+          res.status(400).json('Error [Add Driver]: ' + err)
+        );
 
     default:
       res.status(400).json('Error [Driver operation not supported]');

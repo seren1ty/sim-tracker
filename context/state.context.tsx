@@ -56,7 +56,9 @@ const StateProvider = ({ children }: ContextProps) => {
   useEffect(() => {
     (async () => {
       if (status === 'authenticated') {
-        const res = await axios.get('/api/drivers/' + session?.user?.email);
+        const res = await axios.get(
+          '/api/drivers/email/' + session?.user?.email
+        );
         setDriver(res.data);
 
         router.push('/');
