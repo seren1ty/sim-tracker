@@ -20,6 +20,18 @@ export default async function handler(
         .catch((err) => res.status(400).json('Error [Get Game]: ' + err));
       break;
 
+    case 'PUT': // Edit game
+      Game.findByIdAndUpdate(id, { name: req.body.name })
+        .then((game) => res.json(game))
+        .catch((err: Error) =>
+          res.status(400).json('Error [Edit Game]: ' + err)
+        );
+
+    case 'DELETE': // Delete game
+      Game.findByIdAndDelete(id)
+        .then((game) => res.json(game))
+        .catch((err) => res.status(400).json('Error [Delete Game]: ' + err));
+
     default:
       res.status(400).json('Error [Game operation not supported]');
       break;
