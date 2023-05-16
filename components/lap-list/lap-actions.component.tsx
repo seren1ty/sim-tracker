@@ -24,10 +24,10 @@ const LapActions = (props: LapActionsProps) => {
   const onClickEdit = () => {
     router.push(
       {
-        pathname: '/editLap/' + props.lap._id,
+        pathname: '/edit-lap/' + props.lap._id,
         query: { lap: JSON.stringify(props.lap) },
       },
-      '/editLap/'
+      '/edit-lap/'
     );
   };
 

@@ -32,7 +32,7 @@ const AddEditLap: React.FC = () => {
   const [existingLap] = useState(() => {
     if (rawLap) {
       return rawLap;
-    } else if (router.pathname.startsWith('/editLap')) {
+    } else if (router.pathname.startsWith('/edit-lap')) {
       if (getGameState(state)) {
         let storedCurrentLap = getGameState(state).currentLapToEdit;
 
@@ -121,7 +121,7 @@ const AddEditLap: React.FC = () => {
       return;
     }
 
-    if (!existingLap && location.pathname.startsWith('/editLap'))
+    if (!existingLap && location.pathname.startsWith('/edit-lap'))
       router.push('/');
 
     setGame(state.game);
@@ -166,7 +166,7 @@ const AddEditLap: React.FC = () => {
       });
 
     // We are currently editting a lap, NOT creating a new one
-    if (rawLap && location.pathname.startsWith('/editLap'))
+    if (rawLap && location.pathname.startsWith('/edit-lap'))
       setGameState(state, {
         ...getGameState(state),
         currentLapToEdit: rawLap,

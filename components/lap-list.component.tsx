@@ -128,7 +128,7 @@ const LapList: React.FC = () => {
   };
 
   const onClickAdd = () => {
-    router.push('/addLap');
+    router.push('/add-lap');
   };
 
   const onChangeTrack = (trackEvent: React.ChangeEvent<HTMLSelectElement>) => {
