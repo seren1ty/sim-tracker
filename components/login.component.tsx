@@ -30,7 +30,7 @@ const LoginComponent: React.FC = () => {
           </div>
         </div>
         <div className="col-2 col-2-b">
-          <Image src={loginImg} alt="exciting_road" priority />
+          <Image src={loginImg} width="420" alt="exciting_road" priority />
         </div>
       </div>
     </div>

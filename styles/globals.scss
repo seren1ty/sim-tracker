@@ -204,6 +204,7 @@ body {
 
     .settings-icon {
       width: 32px;
+      height: auto;
       transition: 0.5s;
 
       &:hover {
@@ -227,6 +228,7 @@ body {
 
     .logout-icon {
       width: 32px;
+      height: auto;
     }
   }
 }
@@ -411,6 +413,7 @@ body {
 
   .lap-replay-icon {
     width: 28px;
+    height: auto;
   }
 
   .lap-record-link {
@@ -430,6 +433,7 @@ body {
 
   .lap-notes-icon {
     width: 29px;
+    height: auto;
   }
 
   .lap-row-actions {

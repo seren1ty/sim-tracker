@@ -124,7 +124,7 @@ const Navbar = () => {
   if (router.pathname.startsWith('/login')) {
     return (
       <nav className="banner simple">
-        <span className="nav-title">AC Tracker</span>
+        <span className="nav-title">SimTracker</span>
       </nav>
     );
   }
