@@ -15,7 +15,7 @@ export default async function handler(
 
   switch (method) {
     case 'GET' /* Get driver by email */:
-      Driver.find({ email })
+      Driver.findOne({ email })
         .then((driver) => res.json(driver))
         .catch((err) => res.status(400).json('Error [Get Driver]: ' + err));
       break;

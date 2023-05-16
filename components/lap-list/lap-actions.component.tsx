@@ -27,7 +27,7 @@ const LapActions = (props: LapActionsProps) => {
         pathname: '/edit-lap/' + props.lap._id,
         query: { lap: JSON.stringify(props.lap) },
       },
-      '/edit-lap/'
+      '/edit-lap/' + props.lap._id
     );
   };
 
