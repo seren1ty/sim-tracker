@@ -1,3 +1,4 @@
+import '@/styles/imports.css';
 import type { AppProps } from 'next/app';
 import { SessionProvider } from 'next-auth/react';
 import { StateProvider } from '@/context/state.context';
