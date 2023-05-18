@@ -31,11 +31,13 @@ export default async function handler(
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Group]: ' + err)
         );
+      break;
 
     case 'DELETE': // Delete group
       Group.findByIdAndDelete(id)
         .then((group) => res.json(group))
         .catch((err) => res.status(400).json('Error [Delete Group]: ' + err));
+      break;
 
     default:
       res.status(400).json('Error [Group operation not supported]');

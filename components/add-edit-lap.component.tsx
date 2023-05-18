@@ -121,8 +121,9 @@ const AddEditLap: React.FC = () => {
       return;
     }
 
-    if (!existingLap && location.pathname.startsWith('/edit-lap'))
+    if (!existingLap && location.pathname.startsWith('/edit-lap')) {
       router.push('/');
+    }
 
     setGame(state.game);
 
@@ -145,7 +146,9 @@ const AddEditLap: React.FC = () => {
         if (res.data.length > 0) {
           setTracks(res.data.map((t: Track) => t.name));
 
-          if (!track) setTrack(res.data[0].name);
+          if (!track) {
+            setTrack(res.data[0].name);
+          }
         }
       })
       .catch((err) => {
@@ -158,7 +161,9 @@ const AddEditLap: React.FC = () => {
         if (res.data.length > 0) {
           setCars(res.data.map((c: Car) => c.name));
 
-          if (!car) setCar(res.data[0].name);
+          if (!car) {
+            setCar(res.data[0].name);
+          }
         }
       })
       .catch((err) => {
@@ -166,18 +171,21 @@ const AddEditLap: React.FC = () => {
       });
 
     // We are currently editting a lap, NOT creating a new one
-    if (rawLap && location.pathname.startsWith('/edit-lap'))
+    if (rawLap && location.pathname.startsWith('/edit-lap')) {
       setGameState(state, {
         ...getGameState(state),
         currentLapToEdit: rawLap,
       });
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // If game is switched whilst adding/editting a lap, redirect to main lap list
   useEffect(() => {
-    if (!!game) router.push('/');
+    if (!!game) {
+      router.push('/');
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state?.game]);
 
@@ -256,9 +264,13 @@ const AddEditLap: React.FC = () => {
 
     const lapToSave = buildLap();
 
-    if (addTrackInProgress) handleAddNewTrack(lapToSave);
-    else if (addCarInProgress) handleAddNewCar(lapToSave);
-    else handleAddOrEditLap(lapToSave);
+    if (addTrackInProgress) {
+      handleAddNewTrack(lapToSave);
+    } else if (addCarInProgress) {
+      handleAddNewCar(lapToSave);
+    } else {
+      handleAddOrEditLap(lapToSave);
+    }
   };
 
   const buildLap = (): Lap => {
@@ -282,8 +294,11 @@ const AddEditLap: React.FC = () => {
     axios
       .post('/api/tracks', { game: state?.game, name: newTrackName })
       .then(() => {
-        if (addCarInProgress) handleAddNewCar(lapToSave);
-        else handleAddOrEditLap(lapToSave);
+        if (addCarInProgress) {
+          handleAddNewCar(lapToSave);
+        } else {
+          handleAddOrEditLap(lapToSave);
+        }
       })
       .then(() => setAddTrackInProgress(false))
       .catch((err) => console.error('Error [Add Track]: ' + err));
@@ -298,8 +313,11 @@ const AddEditLap: React.FC = () => {
   };
 
   const handleAddOrEditLap = (lapToSave: Lap) => {
-    if (existingLap) editLap(lapToSave);
-    else addLap(lapToSave);
+    if (existingLap) {
+      editLap(lapToSave);
+    } else {
+      addLap(lapToSave);
+    }
   };
 
   const addLap = (lapToSave: Lap) => {
@@ -317,7 +335,7 @@ const AddEditLap: React.FC = () => {
 
   const editLap = (lapToSave: Lap) => {
     axios
-      .put('/api/laps/edit/' + existingLap._id, lapToSave)
+      .put('/api/laps/' + existingLap._id, lapToSave)
       .then((res) => {
         router.push('/');
       })
@@ -356,7 +374,9 @@ const AddEditLap: React.FC = () => {
   const handleGenerateSplitToFasterLap = () => {
     const split = generateSplitToFasterLap(laps, buildLap());
 
-    if (!split || split === '00:00.000') return null;
+    if (!split || split === '00:00.000') {
+      return null;
+    }
 
     return split;
   };
@@ -364,7 +384,9 @@ const AddEditLap: React.FC = () => {
   const handleGenerateSplitToSlowerLap = () => {
     const split = generateSplitToSlowerLap(laps, buildLap());
 
-    if (!split || split === '00:00.000') return null;
+    if (!split || split === '00:00.000') {
+      return null;
+    }
 
     return split;
   };
@@ -381,7 +403,9 @@ const AddEditLap: React.FC = () => {
     );
   };
 
-  if (loading) return <></>;
+  if (loading) {
+    return <></>;
+  }
 
   return (
     <>

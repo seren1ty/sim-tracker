@@ -27,11 +27,13 @@ export default async function handler(
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Driver]: ' + err)
         );
+      break;
 
     case 'DELETE': // Delete driver
       Driver.findByIdAndDelete(id)
         .then((driver) => res.json(driver))
         .catch((err) => res.status(400).json('Error [Delete Driver]: ' + err));
+      break;
 
     default:
       res.status(400).json('Error [Driver operation not supported]');

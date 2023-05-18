@@ -38,11 +38,13 @@ export default async function handler(
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Lap]: ' + err)
         );
+      break;
 
     case 'DELETE': // Delete lap
       Lap.findByIdAndDelete(id)
         .then((lap) => res.json(lap))
         .catch((err) => res.status(400).json('Error [Delete Lap]: ' + err));
+      break;
 
     default:
       res.status(400).json('Error [Lap operation not supported]');

@@ -49,6 +49,7 @@ export default async function handler(
         .save()
         .then((lap: LapDocument) => res.json(lap))
         .catch((err: Error) => res.status(400).json('Error [Add Lap]: ' + err));
+      break;
 
     default:
       res.status(400).json('Error [Lap operation not supported]');

@@ -34,6 +34,7 @@ export default async function handler(
         .catch((err: Error) =>
           res.status(400).json('Error [Add Group]: ' + err)
         );
+      break;
 
     default:
       res.status(400).json('Error [Group operation not supported]');

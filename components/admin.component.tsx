@@ -26,11 +26,17 @@ const Admin = () => {
   const [groups, setGroups] = useState<Group[]>([]);
 
   useEffect(() => {
-    if (dataType === 'Tracks') loadTracks();
-    else if (dataType === 'Cars') loadCars();
-    else if (dataType === 'Drivers') loadDrivers();
-    else if (dataType === 'Games') loadGames();
-    else if (dataType === 'Groups') loadGroups();
+    if (dataType === 'Tracks') {
+      loadTracks();
+    } else if (dataType === 'Cars') {
+      loadCars();
+    } else if (dataType === 'Drivers') {
+      loadDrivers();
+    } else if (dataType === 'Games') {
+      loadGames();
+    } else if (dataType === 'Groups') {
+      loadGroups();
+    }
     // eslint-disable-next-line
   }, [state?.game, dataType]);
 
@@ -333,7 +339,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/api/tracks/delete/' + track._id)
+      .delete('/api/tracks/' + track._id)
       .then((res) => {
         const updatedTracks = tracks.filter(
           (currTrack: Track) => currTrack._id !== res.data._id
@@ -355,7 +361,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/api/cars/delete/' + car._id)
+      .delete('/api/cars/' + car._id)
       .then((res) => {
         const updatedCars = cars.filter(
           (currCar: Car) => currCar._id !== res.data._id
@@ -377,7 +383,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/api/drivers/delete/' + driver._id)
+      .delete('/api/drivers/' + driver._id)
       .then((res) => {
         const updatedDrivers = drivers.filter(
           (currDriver: Driver) => currDriver._id !== res.data._id
@@ -399,7 +405,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/api/games/delete/' + game._id)
+      .delete('/api/games/' + game._id)
       .then((res) => {
         const updatedGames = games.filter(
           (currGame: Game) => currGame._id !== res.data._id
@@ -419,7 +425,7 @@ const Admin = () => {
     state?.setLoading(true);
 
     axios
-      .delete('/api/groups/delete/' + group._id)
+      .delete('/api/groups/' + group._id)
       .then((res) => {
         const updatedGroups = groups.filter(
           (currGroup: Group) => currGroup._id !== res.data._id

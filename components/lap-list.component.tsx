@@ -311,7 +311,7 @@ const LapList: React.FC = () => {
 
   const deleteLap = (id: string) => {
     axios
-      .delete('/api/laps/delete/' + id)
+      .delete('/api/laps/' + id)
       .then((res) => {
         setLaps(laps.filter((lap: Lap) => lap._id !== id));
 

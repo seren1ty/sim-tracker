@@ -26,11 +26,13 @@ export default async function handler(
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Track]: ' + err)
         );
+      break;
 
     case 'DELETE': // Delete track
       Track.findByIdAndDelete(id)
         .then((track) => res.json(track))
         .catch((err) => res.status(400).json('Error [Delete Track]: ' + err));
+      break;
 
     default:
       res.status(400).json('Error [Track operation not supported]');

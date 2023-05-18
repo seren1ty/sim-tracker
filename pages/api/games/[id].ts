@@ -26,11 +26,13 @@ export default async function handler(
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Game]: ' + err)
         );
+      break;
 
     case 'DELETE': // Delete game
       Game.findByIdAndDelete(id)
         .then((game) => res.json(game))
         .catch((err) => res.status(400).json('Error [Delete Game]: ' + err));
+      break;
 
     default:
       res.status(400).json('Error [Game operation not supported]');

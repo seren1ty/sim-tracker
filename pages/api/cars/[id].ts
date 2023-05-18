@@ -26,11 +26,13 @@ export default async function handler(
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Car]: ' + err)
         );
+      break;
 
     case 'DELETE': // Delete car
       Car.findByIdAndDelete(id)
         .then((car) => res.json(car))
         .catch((err) => res.status(400).json('Error [Delete Car]: ' + err));
+      break;
 
     default:
       res.status(400).json('Error [Car operation not supported]');
