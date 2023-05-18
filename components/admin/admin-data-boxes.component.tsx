@@ -97,7 +97,7 @@ const AdminDataBoxes = (props: AdminDataProps) => {
               onMouseEnter={() => onHoverBox(dataItem._id)}
               onMouseLeave={onLeaveBox}
               data-tip
-              data-for={'dataItem_' + dataItem._id}
+              data-tooltip-id={'dataItem_' + dataItem._id}
             >
               {(!showEdit || (showEdit && hoveredId !== dataItem._id)) && (
                 <Truncator

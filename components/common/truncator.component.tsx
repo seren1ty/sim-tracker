@@ -20,7 +20,7 @@ const Truncator = (props: TruncatorProps) => {
     <span>
       {needsTruncating() ? (
         <span>
-          <span data-tip={props.value} data-for={props.id}>
+          <span data-tooltip-content={props.value} data-tooltip-id={props.id}>
             {truncate()}
           </span>
           <Tooltip id={props.id} place="right" />

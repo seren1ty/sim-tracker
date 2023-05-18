@@ -22,7 +22,7 @@
     "react": "18.2.0",
     "react-datepicker": "^4.11.0",
     "react-dom": "18.2.0",
-    "react-tooltip": "^5.11.2",
+    "react-tooltip": "^5.13.0",
     "typescript": "5.0.4"
   },
   "devDependencies": {

@@ -458,8 +458,8 @@ const Admin = () => {
           <span className="add-data-container">
             <button
               className="add-data-btn"
-              data-tip="Add"
-              data-for="add"
+              data-tooltip-content="Add"
+              data-tooltip-id="add"
               onClick={onClickAdd}
             >
               <Image

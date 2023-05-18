@@ -141,8 +141,8 @@ const Navbar = () => {
           <span>
             <button
               className="nav-link nav-item btn btn-link"
-              data-tip="Admin"
-              data-for="admin"
+              data-tooltip-id="admin"
+              data-tooltip-content="Admin"
               onClick={openAdmin}
             >
               <Image
@@ -181,8 +181,8 @@ const Navbar = () => {
         <span>
           <button
             className="nav-link nav-item btn btn-link logout-btn"
-            data-tip="Logout"
-            data-for="logout"
+            data-tooltip-id="logout"
+            data-tooltip-content="Logout"
             onClick={logout}
           >
             <Image

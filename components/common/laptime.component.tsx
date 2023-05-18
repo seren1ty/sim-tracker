@@ -17,7 +17,7 @@ const Laptime = (props: LaptimeProps) => {
           : '')
       }
     >
-      <span data-tip data-for={'laptime_' + props.lap._id}>
+      <span data-tip data-tooltip-id={'laptime_' + props.lap._id}>
         <strong>{props.lap.laptime}</strong>
       </span>
       {(props.lap.isLapRecord ||

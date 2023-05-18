@@ -104,8 +104,8 @@ const LapItem = (props: LapItemProps) => {
             <a
               href={lap.replay}
               target="_"
-              data-tip="Launch Replay"
-              data-for={'replay_' + lap._id}
+              data-tooltip-content="Launch Replay"
+              data-tooltip-id={'replay_' + lap._id}
             >
               <Image
                 src={replayImg}
@@ -133,7 +133,10 @@ const LapItem = (props: LapItemProps) => {
       <td className="lap-notes-cell sub-item">
         {lap.notes && (
           <span>
-            <span data-tip={lap.notes} data-for={'notes_' + lap._id}>
+            <span
+              data-tooltip-content={lap.notes}
+              data-tooltip-id={'notes_' + lap._id}
+            >
               <Image
                 src={notesImg}
                 alt="notes"
