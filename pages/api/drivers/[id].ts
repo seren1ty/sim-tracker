@@ -1,3 +1,4 @@
+import serverAuthCheck from '@/utils/server-auth-check';
 import dbConnect from '@/utils/db-connect';
 import Driver from '@/models/driver.model';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -7,6 +8,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  await serverAuthCheck(req, res);
+
   const {
     query: { id },
     method,
