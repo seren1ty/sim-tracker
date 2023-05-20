@@ -12,6 +12,7 @@ import {
 } from '@/utils/laptime.utils';
 import { Car, Driver, HoveredLap, Lap, Track } from '@/types';
 import { getGameState, setGameState } from '@/utils/ac-localStorage';
+import SkeletonLaps from './skeleton/skeleton-laps.component';
 
 const LapList: React.FC = () => {
   const state = useContext(StateContext);
@@ -328,14 +329,8 @@ const LapList: React.FC = () => {
     setHoveredLap(currHoveredLap);
   };
 
-  if (!state || state.loading) {
-    return (
-      <>
-        <div className="mt-2 ml-2">
-          <strong>Loading your lap records...</strong>
-        </div>
-      </>
-    );
+  if (status !== 'authenticated') {
+    return null;
   }
 
   return (
@@ -353,109 +348,115 @@ const LapList: React.FC = () => {
             </button>
           </span>
         </div>
-        <div className="lap-filter-labels pt-3 mr-0">
-          <span className="lap-filter-md">
-            <select
-              className="lap-filter-select"
-              onChange={onChangeTrack}
-              value={getGameState(state).trackType}
-            >
-              <option value="ALL">All Tracks</option>
-              {tracks.map((track) => {
-                return (
-                  <option value={track.name} key={track._id}>
-                    {track.name}
-                  </option>
-                );
-              })}
-            </select>
-          </span>
-          <span className="lap-filter-md sub-item">
-            <select
-              className="lap-filter-select"
-              onChange={onChangeCar}
-              value={getGameState(state).carType}
-            >
-              <option value="ALL">All Cars</option>
-              {cars.map((car) => {
-                return (
-                  <option value={car.name} key={car._id}>
-                    {car.name}
-                  </option>
-                );
-              })}
-            </select>
-          </span>
-          <span className="lap-filter-lg">
-            <select
-              className="lap-filter-select"
-              onChange={onChangeDriver}
-              value={getGameState(state).driverType}
-            >
-              <option value="ALL">All Drivers</option>
-              {drivers.map((driver) => {
-                return (
-                  <option value={driver.name} key={driver._id}>
-                    {driver.name}
-                  </option>
-                );
-              })}
-            </select>
-          </span>
-          <span className="sub-item">
-            <label>Sort by </label>
-            <select
-              className="lap-filter-select"
-              onChange={onChangeSort}
-              value={getGameState(state).sortType}
-            >
-              <option value="DATE">Date</option>
-              <option value="TRACK">Track</option>
-              <option value="CAR">Car</option>
-              <option value="DRIVER">Driver</option>
-              <option value="LAPTIME">Laptime</option>
-            </select>
-          </span>
-          <span className="laps-shown">
-            <span className="sub-item">Laps: </span>
-            <span>
-              {laps.length} / {originalLaps.length}
-            </span>
-          </span>
-        </div>
-        <table className="table table-hover mt-2">
-          <thead className="thead-light lap-header">
-            <tr>
-              <th>Track</th>
-              <th>Car</th>
-              <th className="sub-item"></th>
-              <th>Laptime</th>
-              <th>Driver</th>
-              <th className="sub-item">Gears</th>
-              <th className="sub-item">TC</th>
-              <th className="sub-item">SC</th>
-              <th>Date</th>
-              <th className="sub-item"></th>
-              <th className="actions-heading sub-item">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {laps.map((lap) => {
-              return (
-                <LapItem
-                  lap={lap}
-                  isLapRecord={checkLapRecord}
-                  isLapRecordForCar={checkLapRecordForCar}
-                  isPersonalLapRecordForCar={checkPersonalLapRecordForCar}
-                  deleteLap={deleteLap}
-                  key={lap._id}
-                  onHover={onHoverLap}
-                  hoveredLap={hoveredLap}
-                />
-              );
-            })}
-          </tbody>
-        </table>
+        {!state || state.loading ? (
+          <SkeletonLaps />
+        ) : (
+          <>
+            <div className="lap-filter-labels pt-3 mr-0">
+              <span className="lap-filter-md">
+                <select
+                  className="lap-filter-select"
+                  onChange={onChangeTrack}
+                  value={getGameState(state).trackType}
+                >
+                  <option value="ALL">All Tracks</option>
+                  {tracks.map((track) => {
+                    return (
+                      <option value={track.name} key={track._id}>
+                        {track.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </span>
+              <span className="lap-filter-md sub-item">
+                <select
+                  className="lap-filter-select"
+                  onChange={onChangeCar}
+                  value={getGameState(state).carType}
+                >
+                  <option value="ALL">All Cars</option>
+                  {cars.map((car) => {
+                    return (
+                      <option value={car.name} key={car._id}>
+                        {car.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </span>
+              <span className="lap-filter-lg">
+                <select
+                  className="lap-filter-select"
+                  onChange={onChangeDriver}
+                  value={getGameState(state).driverType}
+                >
+                  <option value="ALL">All Drivers</option>
+                  {drivers.map((driver) => {
+                    return (
+                      <option value={driver.name} key={driver._id}>
+                        {driver.name}
+                      </option>
+                    );
+                  })}
+                </select>
+              </span>
+              <span className="sub-item">
+                <label>Sort by </label>
+                <select
+                  className="lap-filter-select"
+                  onChange={onChangeSort}
+                  value={getGameState(state).sortType}
+                >
+                  <option value="DATE">Date</option>
+                  <option value="TRACK">Track</option>
+                  <option value="CAR">Car</option>
+                  <option value="DRIVER">Driver</option>
+                  <option value="LAPTIME">Laptime</option>
+                </select>
+              </span>
+              <span className="laps-shown">
+                <span className="sub-item">Laps: </span>
+                <span>
+                  {laps.length} / {originalLaps.length}
+                </span>
+              </span>
+            </div>
+
+            <table className="table table-hover mt-2">
+              <thead className="thead-light lap-header">
+                <tr>
+                  <th>Track</th>
+                  <th>Car</th>
+                  <th className="sub-item"></th>
+                  <th>Laptime</th>
+                  <th>Driver</th>
+                  <th className="sub-item">Gears</th>
+                  <th className="sub-item">TC</th>
+                  <th className="sub-item">SC</th>
+                  <th>Date</th>
+                  <th className="sub-item"></th>
+                  <th className="actions-heading sub-item">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {laps.map((lap) => (
+                  <LapItem
+                    lap={lap}
+                    isLapRecord={checkLapRecord}
+                    isLapRecordForCar={checkLapRecordForCar}
+                    isPersonalLapRecordForCar={checkPersonalLapRecordForCar}
+                    deleteLap={deleteLap}
+                    key={lap._id}
+                    onHover={onHoverLap}
+                    hoveredLap={hoveredLap}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     </>
   );
