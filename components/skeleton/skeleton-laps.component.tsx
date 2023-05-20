@@ -6,7 +6,7 @@ const SkeletonLaps = () => {
   return (
     <>
       <SkeletonFilters />
-      <div className="skeleton-laps">
+      <div className="skeleton-lap-list">
         <SkeletonLap />
         <SkeletonLap />
         <SkeletonLap />
