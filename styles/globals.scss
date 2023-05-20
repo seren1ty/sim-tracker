@@ -114,6 +114,14 @@ body {
 
     .skeleton-filters {
       gap: 10px;
+
+      .skeleton-filter-block {
+        flex-basis: 30%;
+      }
+
+      .long {
+        flex-basis: 40%;
+      }
     }
   }
 
@@ -130,6 +138,16 @@ body {
   @media (max-width: 991px) {
     .ae-page .ae-container .ae-feedback-container {
       display: none;
+    }
+
+    .skeleton-filters {
+      .skeleton-filter-block {
+        flex-basis: 30%;
+      }
+
+      .long {
+        flex-basis: 40%;
+      }
     }
   }
 

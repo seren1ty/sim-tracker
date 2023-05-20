@@ -6,10 +6,10 @@ const SkeletonLap = () => {
       <div className="skeleton-lap-block long"></div>
       <div className="skeleton-lap-block long"></div>
       <div className="skeleton-lap-block"></div>
-      <div className="skeleton-lap-blockm"></div>
       <div className="skeleton-lap-block"></div>
       <div className="skeleton-lap-block"></div>
-      <div className="skeleton-lap-block"></div>
+      <div className="skeleton-lap-block sub-item"></div>
+      <div className="skeleton-lap-block sub-item"></div>
     </div>
   );
 };
