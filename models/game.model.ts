@@ -1,9 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema
 
 const gameSchema = new Schema(
   {
+    groupId: {
+      type: String,
+    },
     name: {
       type: String,
       required: true,
@@ -21,8 +24,8 @@ const gameSchema = new Schema(
   {
     timestamps: true,
   }
-);
+)
 
-const Game = mongoose.models.Game || mongoose.model('Game', gameSchema);
+const Game = mongoose.models.Game || mongoose.model('Game', gameSchema)
 
-export default Game;
+export default Game

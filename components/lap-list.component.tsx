@@ -1,336 +1,346 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import { isBefore, isAfter } from 'date-fns';
-import LapItem from './lap-list/lap-item.component';
-import { StateContext } from '@/context/state.context';
+import React, { useContext, useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import axios from 'axios'
+import { isBefore, isAfter } from 'date-fns'
+import LapItem from './lap-list/lap-item.component'
+import { StateContext } from '@/context/state.context'
 import {
   isLapRecord,
   isLapRecordForCar,
   isPersonalLapRecordForCar,
-} from '@/utils/laptime.utils';
-import { Car, Driver, HoveredLap, Lap, Track } from '@/types';
-import { getGameState, setGameState } from '@/utils/ac-localStorage';
-import SkeletonLaps from './skeleton/skeleton-laps.component';
+} from '@/utils/laptime.utils'
+import { Car, Driver, HoveredLap, Lap, Track } from '@/types'
+import { getGameState, setGameState } from '@/utils/ac-localStorage'
+import SkeletonLaps from './skeleton/skeleton-laps.component'
 
 const LapList: React.FC = () => {
-  const state = useContext(StateContext);
+  const state = useContext(StateContext)
 
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession()
 
-  const [originalLaps, setOriginalLaps] = useState([]);
+  const [originalLaps, setOriginalLaps] = useState([])
 
-  const [laps, setLaps] = useState<Lap[]>([]);
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [cars, setCars] = useState<Car[]>([]);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [laps, setLaps] = useState<Lap[]>([])
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [cars, setCars] = useState<Car[]>([])
+  const [drivers, setDrivers] = useState<Driver[]>([])
 
-  const [hoveredLap, setHoveredLap] = useState<HoveredLap | null>(null);
+  const [hoveredLap, setHoveredLap] = useState<HoveredLap | null>(null)
 
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
-    handleLoadData();
+    handleLoadData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, state?.group, state?.game]);
+  }, [status, state?.group, state?.game])
 
   const handleLoadData = () => {
     if (!session || !session.user || !state) {
-      return;
+      return
     }
 
-    state.setLoading(true);
+    state.setLoading(true)
 
     axios
-      .get('/api/laps/game/' + state.game)
+      .get('/api/laps/game/' + state.game?._id)
       .then((res) => {
-        setOriginalLaps(res.data);
+        setOriginalLaps(res.data)
 
-        handleSetLaps(res.data);
+        handleSetLaps(res.data)
 
-        state.setLoading(false);
+        state.setLoading(false)
       })
       .catch((err) => {
-        console.error(err);
-      });
+        console.error(err)
+      })
 
     axios
-      .get('/api/tracks/game/' + state.game)
+      .get('/api/tracks/game/' + state.game?._id)
       .then((res) => {
-        handleSetTracks(res.data);
+        handleSetTracks(res.data)
       })
       .catch((err) => {
-        console.error(err);
-      });
+        console.error(err)
+      })
 
     axios
-      .get('/api/cars/game/' + state.game)
+      .get('/api/cars/game/' + state.game?._id)
       .then((res) => {
-        handleSetCars(res.data);
+        handleSetCars(res.data)
       })
       .catch((err) => {
-        console.error(err);
-      });
+        console.error(err)
+      })
 
     axios
       .get('/api/drivers')
       .then((res) => {
-        handleSetDrivers(res.data);
+        handleSetDrivers(res.data)
       })
       .catch((err) => {
-        console.error(err);
-      });
-  };
+        console.error(err)
+      })
+  }
 
   const handleSetLaps = (newLaps: Lap[]) => {
-    let sortedLaps = handleChangeSort(getGameState(state).sortType, newLaps);
+    let sortedLaps = handleChangeSort(getGameState(state).sortType, newLaps)
 
-    if (getGameState(state).trackType !== 'ALL')
+    console.log('==== laps: ' + sortedLaps.length)
+
+    console.log('==== trackIdFilter: ' + getGameState(state).trackIdFilter)
+    if (getGameState(state).trackIdFilter !== 'ALL') {
       sortedLaps = sortedLaps.filter(
-        (lap: Lap) => lap.track === getGameState(state).trackType
-      );
+        (lap: Lap) => lap.trackId === getGameState(state).trackIdFilter
+      )
+    }
 
-    if (getGameState(state).carType !== 'ALL')
+    console.log('==== carIdFilter: ' + getGameState(state).carIdFilter)
+    if (getGameState(state).carIdFilter !== 'ALL') {
       sortedLaps = sortedLaps.filter(
-        (lap: Lap) => lap.car === getGameState(state).carType
-      );
+        (lap: Lap) => lap.carId === getGameState(state).carIdFilter
+      )
+    }
 
-    if (getGameState(state).driverType !== 'ALL')
+    console.log('==== driverIdFilter: ' + getGameState(state).driverIdFilter)
+    if (getGameState(state).driverIdFilter !== 'ALL') {
       sortedLaps = sortedLaps.filter(
-        (lap: Lap) => lap.driver === getGameState(state).driverType
-      );
+        (lap: Lap) => lap.driverId === getGameState(state).driverIdFilter
+      )
+    }
 
-    setLaps(sortedLaps);
-  };
+    console.log('==== laps: ' + sortedLaps.length)
+    setLaps(sortedLaps)
+  }
 
   const handleSetTracks = (newTracks: Track[]) => {
     newTracks.sort((a, b) => {
-      return a.name > b.name ? 1 : b.name > a.name ? -1 : 0;
-    });
+      return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+    })
 
-    setTracks(newTracks);
-  };
+    setTracks(newTracks)
+  }
 
   const handleSetCars = (newCars: Car[]) => {
     newCars.sort((a, b) => {
-      return a.name > b.name ? 1 : b.name > a.name ? -1 : 0;
-    });
+      return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+    })
 
-    setCars(newCars);
-  };
+    setCars(newCars)
+  }
 
   const handleSetDrivers = (newDrivers: Driver[]) => {
     newDrivers.sort((a, b) => {
-      return a.name > b.name ? 1 : b.name > a.name ? -1 : 0;
-    });
+      return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+    })
 
-    setDrivers(newDrivers);
-  };
+    setDrivers(newDrivers)
+  }
 
   const onClickAdd = () => {
-    router.push('/add-lap');
-  };
+    router.push('/add-lap')
+  }
 
   const onChangeTrack = (trackEvent: React.ChangeEvent<HTMLSelectElement>) => {
-    handleChangeTrack(trackEvent.target.value);
+    handleChangeTrack(trackEvent.target.value)
 
     setGameState(state, {
       ...getGameState(state),
-      trackType: trackEvent.target.value,
-    });
-  };
+      trackIdFilter: trackEvent.target.value,
+    })
+  }
 
-  const handleChangeTrack = (newTrackType: string) => {
-    let filteredLaps;
+  const handleChangeTrack = (newTrackId: string) => {
+    let filteredLaps
 
-    filteredLaps = [...originalLaps];
+    filteredLaps = [...originalLaps]
 
-    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps);
+    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps)
 
-    if (getGameState(state).driverType !== 'ALL')
+    if (getGameState(state).driverIdFilter !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.driver === getGameState(state).driverType
-      );
+        (lap: Lap) => lap.driverId === getGameState(state).driverIdFilter
+      )
 
-    if (getGameState(state).carType !== 'ALL')
+    if (getGameState(state).carIdFilter !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.car === getGameState(state).carType
-      );
+        (lap: Lap) => lap.carId === getGameState(state).carIdFilter
+      )
 
-    if (newTrackType !== 'ALL')
+    if (newTrackId !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.track === newTrackType
-      );
+        (lap: Lap) => lap.trackId === newTrackId
+      )
 
-    setLaps(filteredLaps);
-  };
+    setLaps(filteredLaps)
+  }
 
   const onChangeCar = (carEvent: React.ChangeEvent<HTMLSelectElement>) => {
-    handleChangeCar(carEvent.target.value);
+    handleChangeCar(carEvent.target.value)
 
     setGameState(state, {
       ...getGameState(state),
-      carType: carEvent.target.value,
-    });
-  };
+      carIdFilter: carEvent.target.value,
+    })
+  }
 
-  const handleChangeCar = (newCarType: string) => {
-    let filteredLaps;
+  const handleChangeCar = (newCarId: string) => {
+    let filteredLaps
 
-    filteredLaps = [...originalLaps];
+    filteredLaps = [...originalLaps]
 
-    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps);
+    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps)
 
-    if (getGameState(state).trackType !== 'ALL')
+    if (getGameState(state).trackIdFilter !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.track === getGameState(state).trackType
-      );
+        (lap: Lap) => lap.trackId === getGameState(state).trackIdFilter
+      )
 
-    if (getGameState(state).driverType !== 'ALL')
+    if (getGameState(state).driverIdFilter !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.driver === getGameState(state).driverType
-      );
+        (lap: Lap) => lap.driverId === getGameState(state).driverIdFilter
+      )
 
-    if (newCarType !== 'ALL')
-      filteredLaps = filteredLaps.filter((lap: Lap) => lap.car === newCarType);
+    if (newCarId !== 'ALL')
+      filteredLaps = filteredLaps.filter((lap: Lap) => lap.carId === newCarId)
 
-    setLaps(filteredLaps);
-  };
+    setLaps(filteredLaps)
+  }
 
   const onChangeDriver = (
     driverEvent: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    handleChangeDriver(driverEvent.target.value);
+    handleChangeDriver(driverEvent.target.value)
 
     setGameState(state, {
       ...getGameState(state),
-      driverType: driverEvent.target.value,
-    });
-  };
+      driverIdFilter: driverEvent.target.value,
+    })
+  }
 
-  const handleChangeDriver = (newDriverType: string) => {
-    let filteredLaps;
+  const handleChangeDriver = (newDriverId: string) => {
+    let filteredLaps
 
-    filteredLaps = [...originalLaps];
+    filteredLaps = [...originalLaps]
 
-    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps);
+    filteredLaps = handleChangeSort(getGameState(state).sortType, filteredLaps)
 
-    if (getGameState(state).trackType !== 'ALL')
+    if (getGameState(state).trackIdFilter !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.track === getGameState(state).trackType
-      );
+        (lap: Lap) => lap.trackId === getGameState(state).trackIdFilter
+      )
 
-    if (getGameState(state).carType !== 'ALL')
+    if (getGameState(state).carIdFilter !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.car === getGameState(state).carType
-      );
+        (lap: Lap) => lap.carId === getGameState(state).carIdFilter
+      )
 
-    if (newDriverType !== 'ALL')
+    if (newDriverId !== 'ALL')
       filteredLaps = filteredLaps.filter(
-        (lap: Lap) => lap.driver === newDriverType
-      );
+        (lap: Lap) => lap.driverId === newDriverId
+      )
 
-    setLaps(filteredLaps);
-  };
+    setLaps(filteredLaps)
+  }
 
   const onChangeSort = (sortEvent: React.ChangeEvent<HTMLSelectElement>) => {
     setGameState(state, {
       ...getGameState(state),
       sortType: sortEvent.target.value,
-    });
+    })
 
-    const sortedLaps = handleChangeSort(sortEvent.target.value);
+    const sortedLaps = handleChangeSort(sortEvent.target.value)
 
-    setLaps(sortedLaps);
-  };
+    setLaps(sortedLaps)
+  }
 
   const handleChangeSort = (newSortType: string, newLaps?: Lap[]) => {
-    let currentLaps = newLaps ? newLaps : [...laps];
+    let currentLaps = newLaps ? newLaps : [...laps]
+    console.log('==== laps: ' + currentLaps.length)
 
     if (newSortType === 'TRACK') {
       currentLaps.sort((a, b) => {
-        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0;
-      });
+        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0
+      })
 
       currentLaps.sort((a, b) => {
-        return a.track > b.track ? 1 : b.track > a.track ? -1 : 0;
-      });
+        return a.track > b.track ? 1 : b.track > a.track ? -1 : 0
+      })
     } else if (newSortType === 'CAR') {
       currentLaps.sort((a, b) => {
-        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0;
-      });
+        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0
+      })
 
       currentLaps.sort((a, b) => {
-        return a.car > b.car ? 1 : b.car > a.car ? -1 : 0;
-      });
+        return a.car > b.car ? 1 : b.car > a.car ? -1 : 0
+      })
     } else if (newSortType === 'DRIVER') {
       currentLaps.sort((a, b) => {
-        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0;
-      });
+        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0
+      })
 
       currentLaps.sort((a, b) => {
-        return a.driver > b.driver ? 1 : b.driver > a.driver ? -1 : 0;
-      });
+        return a.driver > b.driver ? 1 : b.driver > a.driver ? -1 : 0
+      })
     } else if (newSortType === 'LAPTIME') {
       currentLaps.sort((a, b) => {
-        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0;
-      });
+        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0
+      })
     } else if (newSortType === 'DATE') {
       currentLaps.sort((a, b) => {
-        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0;
-      });
+        return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0
+      })
 
       currentLaps.sort((a, b) => {
-        const dateA = new Date(a.date);
-        const dateB = new Date(b.date);
+        const dateA = new Date(a.date)
+        const dateB = new Date(b.date)
 
         const aBiggerB = isBefore(dateA, dateB)
           ? 1
           : isAfter(dateA, dateB)
           ? -1
-          : 0;
+          : 0
 
-        return aBiggerB;
-      });
+        return aBiggerB
+      })
     }
 
-    return currentLaps;
-  };
+    return currentLaps
+  }
 
   const checkLapRecord = (currentLap: Lap) => {
-    return isLapRecord(originalLaps, currentLap);
-  };
+    return isLapRecord(originalLaps, currentLap)
+  }
 
   const checkLapRecordForCar = (currentLap: Lap) => {
-    return isLapRecordForCar(originalLaps, currentLap);
-  };
+    return isLapRecordForCar(originalLaps, currentLap)
+  }
 
   const checkPersonalLapRecordForCar = (currentLap: Lap) => {
-    return isPersonalLapRecordForCar(originalLaps, currentLap);
-  };
+    return isPersonalLapRecordForCar(originalLaps, currentLap)
+  }
 
   const deleteLap = (id: string) => {
     axios
       .delete('/api/laps/' + id)
       .then((res) => {
-        setLaps(laps.filter((lap: Lap) => lap._id !== id));
+        setLaps(laps.filter((lap: Lap) => lap._id !== id))
 
-        setOriginalLaps(originalLaps.filter((lap: Lap) => lap._id !== id));
+        setOriginalLaps(originalLaps.filter((lap: Lap) => lap._id !== id))
 
-        router.push('/');
+        router.push('/')
       })
       .catch((err) => {
-        console.error('Error [Delete Lap]: ' + err);
-      });
-  };
+        console.error('Error [Delete Lap]: ' + err)
+      })
+  }
 
   const onHoverLap = (currHoveredLap: HoveredLap | null) => {
-    setHoveredLap(currHoveredLap);
-  };
+    setHoveredLap(currHoveredLap)
+  }
 
   if (status !== 'authenticated') {
-    return null;
+    return null
   }
 
   return (
@@ -357,15 +367,15 @@ const LapList: React.FC = () => {
                 <select
                   className="lap-filter-select"
                   onChange={onChangeTrack}
-                  value={getGameState(state).trackType}
+                  value={getGameState(state).trackIdFilter}
                 >
                   <option value="ALL">All Tracks</option>
                   {tracks.map((track) => {
                     return (
-                      <option value={track.name} key={track._id}>
+                      <option value={track._id} key={track._id}>
                         {track.name}
                       </option>
-                    );
+                    )
                   })}
                 </select>
               </span>
@@ -373,15 +383,15 @@ const LapList: React.FC = () => {
                 <select
                   className="lap-filter-select"
                   onChange={onChangeCar}
-                  value={getGameState(state).carType}
+                  value={getGameState(state).carIdFilter}
                 >
                   <option value="ALL">All Cars</option>
                   {cars.map((car) => {
                     return (
-                      <option value={car.name} key={car._id}>
+                      <option value={car._id} key={car._id}>
                         {car.name}
                       </option>
-                    );
+                    )
                   })}
                 </select>
               </span>
@@ -389,15 +399,15 @@ const LapList: React.FC = () => {
                 <select
                   className="lap-filter-select"
                   onChange={onChangeDriver}
-                  value={getGameState(state).driverType}
+                  value={getGameState(state).driverIdFilter}
                 >
                   <option value="ALL">All Drivers</option>
                   {drivers.map((driver) => {
                     return (
-                      <option value={driver.name} key={driver._id}>
+                      <option value={driver._id} key={driver._id}>
                         {driver.name}
                       </option>
-                    );
+                    )
                   })}
                 </select>
               </span>
@@ -459,7 +469,7 @@ const LapList: React.FC = () => {
         )}
       </div>
     </>
-  );
-};
+  )
+}
 
-export default LapList;
+export default LapList

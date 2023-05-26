@@ -1,25 +1,25 @@
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
-import { Driver, Lap } from '@/types';
+import React, { useState } from 'react'
+import { useRouter } from 'next/router'
+import { Driver, Lap } from '@/types'
 
 type LapActionsProps = {
-  sessionDriver: Driver | null | undefined;
-  lap: Lap;
-  deleteLap: (id: string) => void;
-};
+  sessionDriver: Driver | null | undefined
+  lap: Lap
+  deleteLap: (id: string) => void
+}
 
 const LapActions = (props: LapActionsProps) => {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const onClickDelete = () => {
-    setShowConfirm(true);
-  };
+    setShowConfirm(true)
+  }
 
   const onClickCancel = () => {
-    setShowConfirm(false);
-  };
+    setShowConfirm(false)
+  }
 
   const onClickEdit = () => {
     router.push(
@@ -28,8 +28,8 @@ const LapActions = (props: LapActionsProps) => {
         query: { lap: JSON.stringify(props.lap) },
       },
       '/edit-lap/' + props.lap._id
-    );
-  };
+    )
+  }
 
   return (
     <div>
@@ -75,7 +75,7 @@ const LapActions = (props: LapActionsProps) => {
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default LapActions;
+export default LapActions

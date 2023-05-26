@@ -1,9 +1,9 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Driver from '@/models/driver.model'
+import Car from '@/models/car.model'
 import Lap from '@/models/lap.model'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { DriverDocument } from '@/types'
+import { CarDocument } from '@/types'
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,24 +11,27 @@ export default async function handler(
 ) {
   await serverAuthCheck(req, res)
 
-  const { method } = req
+  const {
+    query: { gameId },
+    method,
+  } = req
 
   await dbConnect()
 
   switch (method) {
     case 'GET':
-      Driver.find()
+      Car.find({ gameId })
         .collation({ locale: 'en', strength: 2 })
-        .then((drivers) => {
-          let newDrivers: DriverDocument[] = []
+        .then((cars) => {
+          let newCars: CarDocument[] = []
 
-          drivers.forEach((driver) => {
-            Lap.exists({ driver: driver.name }).then((result) => {
-              driver._doc.hasLaps = result
-              newDrivers.push(driver)
+          cars.forEach((car) => {
+            Lap.exists({ car: car.name }).then((result) => {
+              car._doc.hasLaps = result
+              newCars.push(car)
 
-              if (newDrivers.length === drivers.length) {
-                newDrivers.sort((a, b) => {
+              if (newCars.length === cars.length) {
+                newCars.sort((a, b) => {
                   return a._doc.name > b._doc.name
                     ? 1
                     : b._doc.name > a._doc.name
@@ -36,18 +39,18 @@ export default async function handler(
                     : 0
                 })
 
-                res.json(newDrivers)
+                res.json(newCars)
               }
             })
           })
         })
         .catch((err) =>
-          res.status(400).json('Error [Get All Drivers Laps]: ' + err)
+          res.status(400).json('Error [Get All Tracks For Game]: ' + err)
         )
       break
 
     default:
-      res.status(400).json('Error [Driver operation not supported]')
+      res.status(400).json('Error [Lap operation not supported]')
       break
   }
 }

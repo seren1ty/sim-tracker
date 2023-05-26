@@ -1,75 +1,75 @@
-import React, { useContext, useState, useEffect } from 'react';
-import AcDate from '@/components/common/ac-date.component';
-import Truncator from '@/components/common/truncator.component';
-import { Tooltip } from 'react-tooltip';
-import { StateContext } from '@/context/state.context';
-import Laptime from '@/components/common/laptime.component';
-import LapActions from './lap-actions.component';
-import { HoveredLap, Lap } from '@/types';
-import { getGameState } from '@/utils/ac-localStorage';
-import Image from 'next/image';
-import replayImg from '@/public/replay_blue.png';
-import notesImg from '@/public/notes_blue.png';
+import React, { useContext, useState, useEffect } from 'react'
+import AcDate from '@/components/common/ac-date.component'
+import Truncator from '@/components/common/truncator.component'
+import { Tooltip } from 'react-tooltip'
+import { StateContext } from '@/context/state.context'
+import Laptime from '@/components/common/laptime.component'
+import LapActions from './lap-actions.component'
+import { HoveredLap, Lap } from '@/types'
+import { getGameState } from '@/utils/ac-localStorage'
+import Image from 'next/image'
+import replayImg from '@/public/replay_blue.png'
+import notesImg from '@/public/notes_blue.png'
 
 type LapItemProps = {
-  lap: Lap;
-  hoveredLap: HoveredLap | null;
-  isLapRecord: (currentLap: Lap) => boolean;
-  isLapRecordForCar: (currentLap: Lap) => boolean;
-  isPersonalLapRecordForCar: (currentLap: Lap) => boolean;
-  deleteLap: (_id: string) => void;
-  onHover: (hoveredLapData: HoveredLap | null) => void;
-};
+  lap: Lap
+  hoveredLap: HoveredLap | null
+  isLapRecord: (currentLap: Lap) => boolean
+  isLapRecordForCar: (currentLap: Lap) => boolean
+  isPersonalLapRecordForCar: (currentLap: Lap) => boolean
+  deleteLap: (_id: string) => void
+  onHover: (hoveredLapData: HoveredLap | null) => void
+}
 
 const LapItem = (props: LapItemProps) => {
-  const [lap, setLap] = useState<Lap>(props.lap);
-  const [isLapHovered, setIsLapHovered] = useState<boolean>(false);
+  const [lap, setLap] = useState<Lap>(props.lap)
+  const [isLapHovered, setIsLapHovered] = useState<boolean>(false)
 
   useEffect(() => {
-    lap.isLapRecord = props.isLapRecord(lap);
-    lap.isLapRecordForCar = props.isLapRecordForCar(lap);
-    lap.isPersonalLapRecordForCar = props.isPersonalLapRecordForCar(lap);
+    lap.isLapRecord = props.isLapRecord(lap)
+    lap.isLapRecordForCar = props.isLapRecordForCar(lap)
+    lap.isPersonalLapRecordForCar = props.isPersonalLapRecordForCar(lap)
 
-    setLap({ ...lap });
+    setLap({ ...lap })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   useEffect(() => {
-    setIsLapHovered(!!props.hoveredLap);
+    setIsLapHovered(!!props.hoveredLap)
     // eslint-disable-next-line
-  }, [props.hoveredLap]);
+  }, [props.hoveredLap])
 
-  const state = useContext(StateContext);
+  const state = useContext(StateContext)
 
   const highlightDriversLap = () => {
-    return shownLapsAreNotLimitedToCurrentDriver() && lapIsForCurrentDriver();
-  };
+    return shownLapsAreNotLimitedToCurrentDriver() && lapIsForCurrentDriver()
+  }
 
   const shownLapsAreNotLimitedToCurrentDriver = () => {
-    return getGameState(state).driverType !== lap.driver;
-  };
+    return getGameState(state).driverIdFilter !== lap.driverId
+  }
 
   const lapIsForCurrentDriver = () => {
-    return !!state ? state.driver?.name === lap.driver : false;
-  };
+    return !!state ? state.driver?._id === lap.driverId : false
+  }
 
   const isLapDataHovered = (type: string, data: string) => {
     return (
       isLapHovered &&
       props.hoveredLap?.type === type &&
       props.hoveredLap?.data === data
-    );
-  };
+    )
+  }
 
   const enabledMobileReplay = () => {
-    return lap.replay && state?.showMobile;
-  };
+    return lap.replay && state?.showMobile
+  }
 
   const onClickLapRow = () => {
     if (enabledMobileReplay()) {
-      window.open(lap.replay);
+      window.open(lap.replay)
     }
-  };
+  }
 
   return (
     <tr
@@ -78,9 +78,11 @@ const LapItem = (props: LapItemProps) => {
     >
       <td className={enabledMobileReplay() ? 'has-replay' : ''}>
         <span
-          className={isLapDataHovered('Track', lap.track) ? 'text-strong' : ''}
+          className={
+            isLapDataHovered('Track', lap.trackId) ? 'text-strong' : ''
+          }
           onMouseEnter={() =>
-            props.onHover({ _id: lap._id, type: 'Track', data: lap.track })
+            props.onHover({ _id: lap._id, type: 'Track', data: lap.trackId })
           }
           onMouseLeave={() => props.onHover(null)}
         >
@@ -89,9 +91,9 @@ const LapItem = (props: LapItemProps) => {
       </td>
       <td className="lap-car-cell">
         <span
-          className={isLapDataHovered('Car', lap.car) ? 'text-strong' : ''}
+          className={isLapDataHovered('Car', lap.carId) ? 'text-strong' : ''}
           onMouseEnter={() =>
-            props.onHover({ _id: lap._id, type: 'Car', data: lap.car })
+            props.onHover({ _id: lap._id, type: 'Car', data: lap.carId })
           }
           onMouseLeave={() => props.onHover(null)}
         >
@@ -156,7 +158,7 @@ const LapItem = (props: LapItemProps) => {
         />
       </td>
     </tr>
-  );
-};
+  )
+}
 
-export default LapItem;
+export default LapItem

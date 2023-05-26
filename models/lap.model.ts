@@ -1,14 +1,20 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema
 
 const lapSchema = new Schema(
   {
+    groupId: { type: String },
+    group: { type: String },
+    gameId: { type: String },
     game: { type: String, required: true },
+    trackId: { type: String },
     track: { type: String, required: true },
+    carId: { type: String },
     car: { type: String, required: true },
-    laptime: { type: String, required: true },
+    driverId: { type: String },
     driver: { type: String, required: true },
+    laptime: { type: String, required: true },
     gearbox: { type: String, required: true },
     traction: { type: String, required: true },
     stability: { type: String, required: true },
@@ -19,8 +25,8 @@ const lapSchema = new Schema(
   {
     timestamps: true,
   }
-);
+)
 
-const Lap = mongoose.models.Lap || mongoose.model('Lap', lapSchema);
+const Lap = mongoose.models.Lap || mongoose.model('Lap', lapSchema)
 
-export default Lap;
+export default Lap

@@ -1,103 +1,106 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import { Tooltip } from 'react-tooltip';
-import { StateContext } from '@/context/state.context';
-import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage';
-import { Game, Group } from '@/types';
-import Image from 'next/image';
-import logoutImg from '@/public/logout_blue.png';
-import adminImg from '@/public/settings_blue.png';
-import Link from 'next/link';
+import React, { useContext, useEffect, useState } from 'react'
+import { useSession, signOut } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import axios from 'axios'
+import { Tooltip } from 'react-tooltip'
+import { StateContext } from '@/context/state.context'
+import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage'
+import { Game, Group } from '@/types'
+import Image from 'next/image'
+import logoutImg from '@/public/logout_blue.png'
+import adminImg from '@/public/settings_blue.png'
+import Link from 'next/link'
 
 const Navbar = () => {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
 
-  const router = useRouter();
+  const router = useRouter()
 
-  const state = useContext(StateContext);
+  const state = useContext(StateContext)
 
-  const [groups, setGroups] = useState<Group[] | null>(null);
-  const [games, setGames] = useState<Game[] | null>(null);
+  const [groups, setGroups] = useState<Group[] | null>(null)
+  const [games, setGames] = useState<Game[] | null>(null)
 
   /* const [group, setGroup] = useState(() => {
         return session?.group ? session.group : undefined;
     }); */
 
   const [game, setGame] = useState(() => {
-    return state?.game ? state.game : 'Assetto Corsa';
-  });
+    return state?.game
+      ? state.game
+      : // TODO Remove and init without hardcoded server value
+        { _id: '5ff02ceaeff1fa286892c01a', name: 'Assetto Corsa', code: 'AC' }
+  })
 
   useEffect(() => {
     //initGroups();
-    initGames();
+    initGames()
 
     // Backup check for mobile blocking initial request
     setTimeout(() => {
       //if (!groups) initGroups();
 
-      if (!games) initGames();
-    }, 2000);
+      if (!games) initGames()
+    }, 2000)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.driver]);
+  }, [state?.driver])
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 390) {
-        state?.setShowMobile(true);
+        state?.setShowMobile(true)
       }
-    };
+    }
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize)
 
-    handleResize();
+    handleResize()
 
-    return () => window.removeEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   const initGroups = () => {
     if (!session || !session.user) {
-      return;
+      return
     }
 
     axios
       .get('/api/groups')
       .then((res) => {
-        setGroups(res.data);
+        setGroups(res.data)
 
         if (!state?.group && !!res.data.length) {
-          state?.setGroup(res.data[0].name);
+          state?.setGroup(res.data[0])
         }
       })
       .catch((err) => {
-        console.error(err);
-      });
-  };
+        console.error(err)
+      })
+  }
 
   const initGames = () => {
     if (!session || !session.user) {
-      return;
+      return
     }
 
     axios
       .get('/api/games')
       .then((res) => {
-        setGames(res.data);
+        setGames(res.data)
 
         if (!state?.game && !!res.data.length) {
-          state?.setGame(res.data[0].name);
+          state?.setGame(res.data[0])
         }
       })
       .catch((err) => {
-        console.error(err);
-      });
-  };
+        console.error(err)
+      })
+  }
 
   const openAdmin = () => {
-    router.push('/admin');
-  };
+    router.push('/admin')
+  }
 
   /* const onChangeGroup = (groupEvent: React.ChangeEvent<HTMLSelectElement>) => {
         setGroup(groupEvent.target.value);
@@ -108,25 +111,31 @@ const Navbar = () => {
     } */
 
   const onChangeGame = (gameEvent: React.ChangeEvent<HTMLSelectElement>) => {
-    setGame(gameEvent.target.value);
+    const selectedGame = games?.find((g) => g._id === gameEvent.target.value)
 
-    state?.setGame(gameEvent.target.value);
+    if (!selectedGame) {
+      return
+    }
 
-    setAcTrackerState({ ...getAcTrackerState(), game: gameEvent.target.value });
-  };
+    setGame(selectedGame)
+
+    state?.setGame(selectedGame)
+
+    setAcTrackerState({ ...getAcTrackerState(), game: selectedGame })
+  }
 
   const logout = async () => {
-    await signOut();
+    await signOut()
 
-    state?.setDriver(null);
-  };
+    state?.setDriver(null)
+  }
 
   if (router.pathname.startsWith('/login')) {
     return (
       <nav className="banner simple">
         <span className="nav-title">SimTracker</span>
       </nav>
-    );
+    )
   }
 
   return (
@@ -156,19 +165,23 @@ const Navbar = () => {
           </span>
         )}
         <span>
-          <select className="game-select" onChange={onChangeGame} value={game}>
+          <select
+            className="game-select"
+            onChange={onChangeGame}
+            value={game._id}
+          >
             {!!games &&
               games.map((game: Game) => {
                 return (
-                  <option key={game._id} value={game.name}>
+                  <option key={game._id} value={game._id}>
                     {state?.showMobile ? game.code : game.name}
                   </option>
-                );
+                )
               })}
           </select>
         </span>
         {/* <span>
-            <select className="game-select" onChange={onChangeGroup} value={group}>
+            <select className="group-select" onChange={onChangeGroup} value={group}>
             {
                 !!groups &&
                 groups.map((group: Group) => {
@@ -196,7 +209,7 @@ const Navbar = () => {
         </span>
       </div>
     </nav>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar

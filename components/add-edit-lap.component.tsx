@@ -1,395 +1,467 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import axios from 'axios';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-import { StateContext } from '@/context/state.context';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import axios from 'axios'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { StateContext } from '@/context/state.context'
 import {
   generateSplitToFasterLap,
   generateSplitToSlowerLap,
   isLapRecord,
   isLapRecordForCar,
   isPersonalLapRecordForCar,
-} from '@/utils/laptime.utils';
-import { Car, Lap, Track } from '@/types';
-import { getGameState, setGameState } from '@/utils/ac-localStorage';
-import Link from 'next/link';
+} from '@/utils/laptime.utils'
+import { Car, Game, Lap, Track } from '@/types'
+import { getGameState, setGameState } from '@/utils/ac-localStorage'
+import Link from 'next/link'
 
 const AddEditLap: React.FC = () => {
-  const state = useContext(StateContext);
+  const state = useContext(StateContext)
 
-  const { data: session } = useSession();
+  const { data: session } = useSession()
 
-  const router = useRouter();
+  const router = useRouter()
 
   const rawLap = useMemo(() => {
-    return !!router.query.lap ? JSON.parse(router.query.lap as string) : null;
-  }, [router]);
-
-  const [loading, setLoading] = useState(false);
+    return !!router.query.lap ? JSON.parse(router.query.lap as string) : null
+  }, [router])
 
   const [existingLap] = useState(() => {
     if (rawLap) {
-      return rawLap;
+      return rawLap
     } else if (router.pathname.startsWith('/edit-lap')) {
       if (getGameState(state)) {
-        let storedCurrentLap = getGameState(state).currentLapToEdit;
+        let storedCurrentLap = getGameState(state).currentLapToEdit
 
         if (
           storedCurrentLap &&
           location.pathname.endsWith(storedCurrentLap._id)
         )
-          return storedCurrentLap;
+          return storedCurrentLap
       }
     }
 
-    return null;
-  });
+    return null
+  })
 
-  const [laps, setLaps] = useState<Lap[]>([]);
-  const [tracks, setTracks] = useState([]);
-  const [cars, setCars] = useState([]);
+  const [laps, setLaps] = useState<Lap[]>([])
+  const [tracks, setTracks] = useState<Track[]>([])
+  const [cars, setCars] = useState<Car[]>([])
 
-  const [addTrackInProgress, setAddTrackInProgress] = useState(false);
-  const [newTrackName, setNewTrackName] = useState('');
+  const [loading, setLoading] = useState(!tracks.length || !cars.length)
 
-  const [addCarInProgress, setAddCarInProgress] = useState(false);
-  const [newCarName, setNewCarName] = useState('');
+  const [addTrackInProgress, setAddTrackInProgress] = useState(false)
+  const [newTrackName, setNewTrackName] = useState('')
+  const newTrackId = useRef('')
 
-  const [submitClicked, setSubmitClicked] = useState(false);
+  const [addCarInProgress, setAddCarInProgress] = useState(false)
+  const [newCarName, setNewCarName] = useState('')
+  const newCarId = useRef('')
 
-  const [game, setGame] = useState<String | null | undefined>();
+  const [submitClicked, setSubmitClicked] = useState(false)
 
-  const [track, setTrack] = useState(() => {
+  const [game, setGame] = useState<Game | null | undefined>()
+
+  const [trackId, setTrackId] = useState(() => {
     return existingLap
-      ? existingLap.track
-      : getGameState(state).newLapDefaultTrack;
-  });
+      ? existingLap.trackId
+      : getGameState(state).newLapDefaultTrackId
+  })
+  const [trackName, setTrackName] = useState(() => {
+    return existingLap ? existingLap.track : ''
+  })
 
-  const [car, setCar] = useState(() => {
-    return existingLap ? existingLap.car : getGameState(state).newLapDefaultCar;
-  });
+  const [carId, setCarId] = useState(() => {
+    return existingLap
+      ? existingLap.carId
+      : getGameState(state).newLapDefaultCarId
+  })
+  const [carName, setCarName] = useState(() => {
+    return existingLap ? existingLap.car : ''
+  })
 
   const [laptime, setLaptime] = useState(() =>
     existingLap ? existingLap.laptime : ''
-  );
+  )
 
-  const [driver] = useState(() =>
+  const [driverId] = useState(() =>
+    state ? state?.driver?._id : existingLap ? existingLap.driverId : ''
+  )
+  const [driverName] = useState(() =>
     state ? state?.driver?.name : existingLap ? existingLap.driver : ''
-  );
+  )
 
   const [gearbox, setGearbox] = useState(() => {
     return existingLap
       ? existingLap.gearbox
-      : getGameState(state).newLapDefaultGearbox;
-  });
+      : getGameState(state).newLapDefaultGearbox
+  })
 
   const [traction, setTraction] = useState(() => {
     return existingLap
       ? existingLap.traction
-      : getGameState(state).newLapDefaultTraction;
-  });
+      : getGameState(state).newLapDefaultTraction
+  })
 
   const [stability, setStability] = useState(() => {
     return existingLap
       ? existingLap.stability
-      : getGameState(state).newLapDefaultStability;
-  });
+      : getGameState(state).newLapDefaultStability
+  })
 
   const [date, setDate] = useState(() =>
     existingLap ? new Date(existingLap.date) : new Date()
-  );
+  )
 
   const [replay, setReplay] = useState(() =>
     existingLap ? existingLap.replay : ''
-  );
+  )
 
   const [notes, setNotes] = useState(() => {
     return existingLap
       ? existingLap.notes
-      : getGameState(state).newLapDefaultNotes;
-  });
+      : getGameState(state).newLapDefaultNotes
+  })
 
-  const [splitToFasterLap, setSplitToFasterLap] = useState<string | null>(null);
-  const [splitToSlowerLap, setSplitToSlowerLap] = useState<string | null>(null);
+  const [splitToFasterLap, setSplitToFasterLap] = useState<string | null>(null)
+  const [splitToSlowerLap, setSplitToSlowerLap] = useState<string | null>(null)
 
   useEffect(() => {
-    setLoading(true);
+    setLoading(true)
 
     if (!session || !session.user || !state) {
-      return;
+      return
     }
 
     if (!existingLap && location.pathname.startsWith('/edit-lap')) {
-      router.push('/');
+      router.push('/')
     }
 
-    setGame(state.game);
+    setGame(state.game)
 
-    axios
-      .get('/api/laps/game/' + state.game)
+    const gamesPromise = axios
+      .get('/api/laps/game/' + state.game?._id)
       .then((res) => {
         if (res.data.length > 0) {
-          setLaps(res.data);
-
-          setLoading(false);
+          setLaps(res.data)
         }
       })
       .catch((err) => {
-        console.error('Error [Get Laps]: ' + err);
-      });
+        console.error('Error [Get Laps]: ' + err)
+      })
 
-    axios
-      .get('/api/tracks/game/' + state.game)
+    const tracksPromise = axios
+      .get('/api/tracks/game/' + state.game?._id)
       .then((res) => {
         if (res.data.length > 0) {
-          setTracks(res.data.map((t: Track) => t.name));
+          setTracks(res.data)
 
-          if (!track) {
-            setTrack(res.data[0].name);
+          if (!trackId) {
+            setTrackId(res.data[0]._id)
           }
         }
       })
       .catch((err) => {
-        console.error('Error [Get Tracks]: ' + err);
-      });
+        console.error('Error [Get Tracks]: ' + err)
+      })
 
-    axios
-      .get('/api/cars/game/' + state.game)
+    const carsPromise = axios
+      .get('/api/cars/game/' + state.game?._id)
       .then((res) => {
         if (res.data.length > 0) {
-          setCars(res.data.map((c: Car) => c.name));
+          setCars(res.data)
 
-          if (!car) {
-            setCar(res.data[0].name);
+          if (!carId) {
+            setCarId(res.data[0]._id)
           }
         }
       })
       .catch((err) => {
-        console.error('Error [Get Cars]: ' + err);
-      });
+        console.error('Error [Get Cars]: ' + err)
+      })
+
+    Promise.all([gamesPromise, tracksPromise, carsPromise]).then(() => {
+      setLoading(false)
+    })
 
     // We are currently editting a lap, NOT creating a new one
     if (rawLap && location.pathname.startsWith('/edit-lap')) {
       setGameState(state, {
         ...getGameState(state),
         currentLapToEdit: rawLap,
-      });
+      })
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   // If game is switched whilst adding/editting a lap, redirect to main lap list
   useEffect(() => {
     if (!!game) {
-      router.push('/');
+      router.push('/')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state?.game]);
+  }, [state?.game])
 
   useEffect(() => {
-    setSplitToFasterLap(handleGenerateSplitToFasterLap());
-    setSplitToSlowerLap(handleGenerateSplitToSlowerLap());
+    setSplitToFasterLap(handleGenerateSplitToFasterLap())
+    setSplitToSlowerLap(handleGenerateSplitToSlowerLap())
 
-    setTrack(track);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [laps, track, car, laptime]);
+  }, [laps, trackId, carId, laptime])
 
   const onChangeTrack = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setTrack(event.target.value);
-  };
+    const id = event.target.value
+    setTrackId(event.target.value)
+    setTrackName(tracks.find((t) => t._id === id)?.name)
+  }
 
   const onChangeCar = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setCar(event.target.value);
-  };
+    const id = event.target.value
+    setCarId(event.target.value)
+    setCarName(cars.find((c) => c._id === id)?.name)
+  }
 
   const onChangeLaptime = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setLaptime(event.target.value);
-  };
+    setLaptime(event.target.value)
+  }
 
   const onChangeGearbox = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setGearbox(event.target.value);
-  };
+    setGearbox(event.target.value)
+  }
 
   const onChangeTraction = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setTraction(event.target.value);
-  };
+    setTraction(event.target.value)
+  }
 
   const onChangeStability = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setStability(event.target.value);
-  };
+    setStability(event.target.value)
+  }
 
   const onChangeDate = (newDate: Date) => {
-    setDate(newDate);
-  };
+    setDate(newDate)
+  }
 
   const onChangeReplay = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setReplay(event.target.value);
-  };
+    setReplay(event.target.value)
+  }
 
   const onChangeNotes = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNotes(event.target.value);
-  };
+    setNotes(event.target.value)
+  }
 
   const onClickAddTrack = () => {
-    setAddTrackInProgress(true);
-  };
+    setAddTrackInProgress(true)
+  }
 
   const onClickCancelAddTrack = () => {
-    setAddTrackInProgress(false);
-  };
+    setAddTrackInProgress(false)
+  }
 
   const onChangeNewTrackName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewTrackName(event.target.value);
-  };
+    setNewTrackName(event.target.value)
+  }
 
   const onClickAddCar = () => {
-    setAddCarInProgress(true);
-  };
+    setAddCarInProgress(true)
+  }
 
   const onClickCancelAddCar = () => {
-    setAddCarInProgress(false);
-  };
+    setAddCarInProgress(false)
+  }
 
   const onChangeNewCarName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNewCarName(event.target.value);
-  };
+    setNewCarName(event.target.value)
+  }
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    event.preventDefault()
 
-    setSubmitClicked(true);
-
-    const lapToSave = buildLap();
+    setSubmitClicked(true)
 
     if (addTrackInProgress) {
-      handleAddNewTrack(lapToSave);
+      handleAddNewTrack()
     } else if (addCarInProgress) {
-      handleAddNewCar(lapToSave);
+      handleAddNewCar()
     } else {
-      handleAddOrEditLap(lapToSave);
+      handleAddOrEditLap()
     }
-  };
+  }
 
   const buildLap = (): Lap => {
+    const currTrack = tracks.find(
+      (t) => t._id === (!addTrackInProgress ? trackId : newTrackId.current)
+    )
+    const currCar = cars.find(
+      (c) => c._id === (!addCarInProgress ? carId : newCarId.current)
+    )
+
+    if (!currTrack || !currCar) {
+      throw Error(
+        'New track/car data not available to build lap ' +
+          currTrack?.name +
+          ' ' +
+          currCar?.name
+      )
+    }
+
+    // TODO Switch back to reading group values once groups enabled.
     return {
       _id: existingLap ? existingLap._id : '',
-      game: !existingLap ? state?.game : existingLap.game,
-      track: !addTrackInProgress ? track : newTrackName,
-      car: !addCarInProgress ? car : newCarName,
+      groupId: '604d68c1fd8e9726c8f8dd8f', //!existingLap ? state?.group?._id : existingLap.groupId,
+      group: 'DriftJockeys', //!existingLap ? state?.group?.name : existingLap.group,
+      gameId: !existingLap ? state?.game?._id : existingLap.gameId,
+      game: !existingLap ? state?.game?.name : existingLap.game,
+      trackId: currTrack._id,
+      track: currTrack.name,
+      carId: currCar._id,
+      car: currCar.name,
+      driverId: driverId,
+      driver: driverName,
       laptime: laptime,
-      driver: driver,
       gearbox: gearbox,
       traction: traction,
       stability: stability,
       date: date,
       replay: replay,
       notes: !notes ? '' : notes.trim(),
-    };
-  };
-
-  const handleAddNewTrack = (lapToSave: Lap) => {
-    axios
-      .post('/api/tracks', { game: state?.game, name: newTrackName })
-      .then(() => {
-        if (addCarInProgress) {
-          handleAddNewCar(lapToSave);
-        } else {
-          handleAddOrEditLap(lapToSave);
-        }
-      })
-      .then(() => setAddTrackInProgress(false))
-      .catch((err) => console.error('Error [Add Track]: ' + err));
-  };
-
-  const handleAddNewCar = (lapToSave: Lap) => {
-    axios
-      .post('/api/cars', { game: state?.game, name: newCarName })
-      .then(() => handleAddOrEditLap(lapToSave))
-      .then(() => setAddCarInProgress(false))
-      .catch((err) => console.error('Error [Add Car]: ' + err));
-  };
-
-  const handleAddOrEditLap = (lapToSave: Lap) => {
-    if (existingLap) {
-      editLap(lapToSave);
-    } else {
-      addLap(lapToSave);
     }
-  };
+  }
+
+  // TODO Switch back to reading group values once groups enabled.
+  const handleAddNewTrack = () => {
+    return (
+      axios
+        .post('/api/tracks', {
+          groupId: '604d68c1fd8e9726c8f8dd8f', //!existingLap ? state?.group?._id : existingLap.groupId,
+          gameId: state?.game?._id,
+          game: state?.game?.name,
+          name: newTrackName,
+        })
+        // Add newly created track to existing track list
+        .then((res) => {
+          newTrackId.current = res.data._id
+          tracks.push(res.data)
+        })
+        .then(() => {
+          if (addCarInProgress) {
+            return handleAddNewCar()
+          } else {
+            return handleAddOrEditLap()
+          }
+        })
+        .catch((err) => console.error('Error [Add Track]: ' + err))
+    )
+  }
+
+  // TODO Switch back to reading group values once groups enabled.
+  const handleAddNewCar = () => {
+    return (
+      axios
+        .post('/api/cars', {
+          groupId: '604d68c1fd8e9726c8f8dd8f', //!existingLap ? state?.group?._id : existingLap.groupId,
+          gameId: state?.game?._id,
+          game: state?.game?.name,
+          name: newCarName,
+        })
+        // Add newly created car to existing car list
+        .then((res) => {
+          newCarId.current = res.data._id
+          cars.push(res.data)
+        })
+        .then(() => handleAddOrEditLap())
+        .catch((err) => console.error('Error [Add Car]: ' + err))
+    )
+  }
+
+  const handleAddOrEditLap = () => {
+    const lapToSave = buildLap()
+
+    if (existingLap) {
+      return editLap(lapToSave)
+    } else {
+      return addLap(lapToSave)
+    }
+  }
 
   const addLap = (lapToSave: Lap) => {
-    axios
+    return axios
       .post('/api/laps', lapToSave)
       .then((res) => {
-        updateNewLapDefaults();
+        updateNewLapDefaults(res.data)
 
-        router.push('/');
+        router.push('/')
       })
       .catch((err) => {
-        console.error('Error [Add Lap]: ' + err);
-      });
-  };
+        console.error('Error [Add Lap]: ' + err)
+      })
+  }
 
   const editLap = (lapToSave: Lap) => {
-    axios
-      .put('/api/laps/' + existingLap._id, lapToSave)
+    return axios
+      .put('/api/laps/' + lapToSave._id, lapToSave)
       .then((res) => {
-        router.push('/');
+        router.push('/')
       })
       .catch((err) => {
-        console.error('Error [Edit Lap]: ' + err);
-      });
-  };
+        console.error('Error [Edit Lap]: ' + err)
+      })
+  }
 
-  const updateNewLapDefaults = () => {
-    let currentGameState = getGameState(state);
+  const updateNewLapDefaults = (newLap: Lap) => {
+    let currentGameState = getGameState(state)
 
-    currentGameState.newLapDefaultTrack = !addTrackInProgress
-      ? track
-      : newTrackName;
-    currentGameState.newLapDefaultCar = !addCarInProgress ? car : newCarName;
-    currentGameState.newLapDefaultGearbox = gearbox;
-    currentGameState.newLapDefaultTraction = traction;
-    currentGameState.newLapDefaultStability = stability;
-    currentGameState.newLapDefaultNotes = notes;
+    currentGameState.newLapDefaultTrackId = newLap.trackId
+    currentGameState.newLapDefaultCarId = newLap.carId
+    currentGameState.newLapDefaultGearbox = gearbox
+    currentGameState.newLapDefaultTraction = traction
+    currentGameState.newLapDefaultStability = stability
+    currentGameState.newLapDefaultNotes = notes
 
-    setGameState(state, currentGameState);
-  };
+    setGameState(state, currentGameState)
+  }
+
+  const displayRecords = () =>
+    !loading && !addTrackInProgress && !addCarInProgress && laptime
 
   const checkLapRecord = () => {
-    return isLapRecord(laps, buildLap());
-  };
+    return displayRecords() ? isLapRecord(laps, buildLap()) : false
+  }
 
   const checkLapRecordForCar = () => {
-    return isLapRecordForCar(laps, buildLap());
-  };
+    return displayRecords() ? isLapRecordForCar(laps, buildLap()) : false
+  }
 
   const checkPersonalLapRecordForCar = () => {
-    return isPersonalLapRecordForCar(laps, buildLap());
-  };
+    return displayRecords()
+      ? isPersonalLapRecordForCar(laps, buildLap())
+      : false
+  }
 
   const handleGenerateSplitToFasterLap = () => {
-    const split = generateSplitToFasterLap(laps, buildLap());
+    const split = displayRecords()
+      ? generateSplitToFasterLap(laps, buildLap())
+      : null
 
     if (!split || split === '00:00.000') {
-      return null;
+      return null
     }
 
-    return split;
-  };
+    return split
+  }
 
   const handleGenerateSplitToSlowerLap = () => {
-    const split = generateSplitToSlowerLap(laps, buildLap());
+    const split = displayRecords()
+      ? generateSplitToSlowerLap(laps, buildLap())
+      : null
 
     if (!split || split === '00:00.000') {
-      return null;
+      return null
     }
 
-    return split;
-  };
+    return split
+  }
 
   const displayExtraFeedback = () => {
     return (
@@ -400,11 +472,11 @@ const AddEditLap: React.FC = () => {
         checkPersonalLapRecordForCar() ||
         !!splitToFasterLap ||
         !!splitToSlowerLap)
-    );
-  };
+    )
+  }
 
   if (loading) {
-    return <></>;
+    return <></>
   }
 
   return (
@@ -443,15 +515,15 @@ const AddEditLap: React.FC = () => {
                       <select
                         className="form-control"
                         required
-                        value={track}
+                        value={trackId}
                         onChange={onChangeTrack}
                       >
                         {tracks.map((currTrack) => {
                           return (
-                            <option key={currTrack} value={currTrack}>
-                              {currTrack}
+                            <option key={currTrack._id} value={currTrack._id}>
+                              {currTrack.name}
                             </option>
-                          );
+                          )
                         })}
                       </select>
                     ) : (
@@ -490,15 +562,15 @@ const AddEditLap: React.FC = () => {
                       <select
                         className="form-control"
                         required
-                        value={car}
+                        value={carId}
                         onChange={onChangeCar}
                       >
                         {cars.map((currCar) => {
                           return (
-                            <option key={currCar} value={currCar}>
-                              {currCar}
+                            <option key={currCar._id} value={currCar._id}>
+                              {currCar.name}
                             </option>
-                          );
+                          )
                         })}
                       </select>
                     ) : (
@@ -544,7 +616,7 @@ const AddEditLap: React.FC = () => {
                     <input
                       className="form-control driver-input"
                       required
-                      value={driver}
+                      value={driverName}
                       disabled={true}
                     />
                   </div>
@@ -672,7 +744,7 @@ const AddEditLap: React.FC = () => {
                     {checkLapRecordForCar() && (
                       <>
                         <span className="lap-record-for-car">Track record</span>
-                        <span> for the {car}</span>
+                        <span> for the {carName}</span>
                       </>
                     )}
                     {checkPersonalLapRecordForCar() && (
@@ -682,7 +754,7 @@ const AddEditLap: React.FC = () => {
                         </span>
                         <span>
                           {' '}
-                          lap for {driver} in the {car}
+                          lap for {driverName} in the {carName}
                         </span>
                       </>
                     )}
@@ -711,7 +783,7 @@ const AddEditLap: React.FC = () => {
         </div>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default AddEditLap;
+export default AddEditLap

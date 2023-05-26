@@ -1,9 +1,12 @@
-import mongoose from 'mongoose';
+import mongoose from 'mongoose'
 
-const Schema = mongoose.Schema;
+const Schema = mongoose.Schema
 
 const driverSchema = new Schema(
   {
+    groupId: {
+      type: String,
+    },
     name: {
       type: String,
       required: true,
@@ -25,8 +28,8 @@ const driverSchema = new Schema(
   {
     timestamps: true,
   }
-);
+)
 
-const Driver = mongoose.models.Driver || mongoose.model('Driver', driverSchema);
+const Driver = mongoose.models.Driver || mongoose.model('Driver', driverSchema)
 
-export default Driver;
+export default Driver
