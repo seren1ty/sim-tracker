@@ -1,238 +1,246 @@
-import { Lap } from '@/types';
+import { Lap } from '@/types'
+
+const getLapsForTrack = (laps: Lap[], trackId: string) => {
+  return laps.filter((lap: Lap) => lap.trackId === trackId)
+}
+
+const getLapsForCar = (laps: Lap[], carId: string) => {
+  return laps.filter((lap: Lap) => lap.carId === carId)
+}
+
+const getLapsForDriver = (laps: Lap[], driverId: string) => {
+  return laps.filter((lap: Lap) => lap.driverId === driverId)
+}
 
 const sortByLaptime = (laps: Lap[]) => {
-  let currentLaps = [...laps];
+  const currentLaps = [...laps]
 
   currentLaps.sort((a, b) => {
-    return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0;
-  });
+    return a.laptime > b.laptime ? 1 : b.laptime > a.laptime ? -1 : 0
+  })
 
-  return currentLaps;
-};
+  return currentLaps
+}
 
 export const isLapRecord = (laps: Lap[], currentLap: Lap): boolean => {
-  let fastestLaps = sortByLaptime(laps);
+  const fastestLaps = sortByLaptime(laps)
 
-  let fastestLapsForTrack = fastestLaps.filter(
-    (lap: Lap) => lap.track === currentLap.track
-  );
+  const lapsForTrack = getLapsForTrack(fastestLaps, currentLap.trackId)
 
   return (
-    fastestLapsForTrack.length === 0 ||
-    fastestLapsForTrack[0]._id === currentLap._id ||
-    currentLap.laptime <= fastestLapsForTrack[0].laptime
-  );
-};
+    lapsForTrack.length === 0 ||
+    lapsForTrack[0]._id === currentLap._id ||
+    currentLap.laptime <= lapsForTrack[0].laptime
+  )
+}
 
 export const isLapRecordForCar = (laps: Lap[], currentLap: Lap) => {
-  let fastestLaps = sortByLaptime(laps);
+  const fastestLaps = sortByLaptime(laps)
 
-  let fastestLapsForTrack = fastestLaps.filter(
-    (lap: Lap) => lap.track === currentLap.track
-  );
+  const lapsForTrack = getLapsForTrack(fastestLaps, currentLap.trackId)
 
-  if (fastestLapsForTrack.length === 0) return false;
+  if (lapsForTrack.length === 0) {
+    return false
+  }
 
-  let fastestLapsForTrackCar = fastestLapsForTrack.filter(
-    (lap: Lap) => lap.car === currentLap.car
-  );
+  const lapsForTrackCar = getLapsForCar(lapsForTrack, currentLap.carId)
 
   return (
-    fastestLapsForTrack[0]._id !== currentLap._id &&
-    currentLap.laptime > fastestLapsForTrack[0].laptime &&
-    (fastestLapsForTrackCar.length === 0 ||
-      fastestLapsForTrackCar[0]._id === currentLap._id ||
-      currentLap.laptime <= fastestLapsForTrackCar[0].laptime)
-  );
-};
+    lapsForTrack[0]._id !== currentLap._id &&
+    currentLap.laptime > lapsForTrack[0].laptime &&
+    (lapsForTrackCar.length === 0 ||
+      lapsForTrackCar[0]._id === currentLap._id ||
+      currentLap.laptime <= lapsForTrackCar[0].laptime)
+  )
+}
 
 export const isPersonalLapRecordForCar = (laps: Lap[], currentLap: Lap) => {
-  let fastestLaps = sortByLaptime(laps);
+  const fastestLaps = sortByLaptime(laps)
 
-  let fastestLapsForTrack = fastestLaps.filter(
-    (lap: Lap) => lap.track === currentLap.track
-  );
+  const lapsForTrack = getLapsForTrack(fastestLaps, currentLap.trackId)
 
-  if (fastestLapsForTrack.length === 0) return false;
+  if (lapsForTrack.length === 0) {
+    return false
+  }
 
-  let fastestLapsForTrackCar = fastestLapsForTrack.filter(
-    (lap: Lap) => lap.car === currentLap.car
-  );
+  const lapsForTrackCar = getLapsForCar(lapsForTrack, currentLap.carId)
 
-  if (fastestLapsForTrackCar.length === 0) return false;
+  if (lapsForTrackCar.length === 0) {
+    return false
+  }
 
-  let fastestLapsForTrackCarDriver = fastestLapsForTrackCar.filter(
-    (lap: Lap) => lap.driver === currentLap.driver
-  );
+  const lapsForTrackCarDriver = getLapsForDriver(
+    lapsForTrackCar,
+    currentLap.driverId
+  )
 
   return (
-    fastestLapsForTrack[0]._id !== currentLap._id &&
-    currentLap.laptime > fastestLapsForTrack[0].laptime &&
-    fastestLapsForTrackCar[0]._id !== currentLap._id &&
-    currentLap.laptime > fastestLapsForTrackCar[0].laptime &&
-    (fastestLapsForTrackCarDriver.length === 0 ||
-      fastestLapsForTrackCarDriver[0]._id === currentLap._id ||
-      currentLap.laptime <= fastestLapsForTrackCarDriver[0].laptime)
-  );
-};
+    lapsForTrack[0]._id !== currentLap._id &&
+    currentLap.laptime > lapsForTrack[0].laptime &&
+    lapsForTrackCar[0]._id !== currentLap._id &&
+    currentLap.laptime > lapsForTrackCar[0].laptime &&
+    (lapsForTrackCarDriver.length === 0 ||
+      lapsForTrackCarDriver[0]._id === currentLap._id ||
+      currentLap.laptime <= lapsForTrackCarDriver[0].laptime)
+  )
+}
 
 export const generateSplitToFasterLap = (laps: Lap[], currentLap: Lap) => {
-  if (!currentLap.laptime || currentLap.laptime.length < 9) return null;
+  if (!currentLap.laptime || currentLap.laptime.length < 9) {
+    return null
+  }
 
-  let fastestLaps = sortByLaptime(laps);
+  const fastestLaps = sortByLaptime(laps)
 
-  let fastestLapsForTrack = fastestLaps.filter(
-    (lap: Lap) => lap.track === currentLap.track
-  );
-
-  if (
-    fastestLapsForTrack.length === 0 ||
-    fastestLapsForTrack[0]._id === currentLap._id ||
-    fastestLapsForTrack[0].laptime === currentLap.laptime
-  )
-    return null;
-
-  let fastestLapsForTrackCar = fastestLapsForTrack.filter(
-    (lap: Lap) => lap.car === currentLap.car
-  );
+  const lapsForTrack = getLapsForTrack(fastestLaps, currentLap.trackId)
 
   if (
-    fastestLapsForTrackCar.length === 0 ||
-    fastestLapsForTrackCar[0]._id === currentLap._id ||
-    fastestLapsForTrackCar[0].laptime === currentLap.laptime
+    lapsForTrack.length === 0 ||
+    lapsForTrack[0]._id === currentLap._id ||
+    lapsForTrack[0].laptime === currentLap.laptime
+  ) {
+    return null
+  }
+
+  const lapsForTrackCar = getLapsForCar(lapsForTrack, currentLap.carId)
+
+  if (
+    lapsForTrackCar.length === 0 ||
+    lapsForTrackCar[0]._id === currentLap._id ||
+    lapsForTrackCar[0].laptime === currentLap.laptime
+  ) {
+    return null
+  }
+
+  const lapsForTrackCarDriver = getLapsForDriver(
+    lapsForTrackCar,
+    currentLap.driverId
   )
-    return null;
 
-  let fastestLapsForTrackCarDriver = fastestLapsForTrackCar.filter(
-    (lap: Lap) => lap.driver === currentLap.driver
-  );
-
-  if (fastestLapsForTrackCarDriver.length === 0) return null;
+  if (lapsForTrackCarDriver.length === 0) {
+    return null
+  }
 
   // Slower then personal best
-  if (fastestLapsForTrackCarDriver[0].laptime < currentLap.laptime) {
+  if (lapsForTrackCarDriver[0].laptime < currentLap.laptime) {
     return diffToFormattedTime(
       lapToMillis(currentLap.laptime) -
-        lapToMillis(fastestLapsForTrackCarDriver[0].laptime)
-    );
+        lapToMillis(lapsForTrackCarDriver[0].laptime)
+    )
   }
   // Equal or Faster then personal best
   else if (
-    fastestLapsForTrackCarDriver[0]._id === currentLap._id ||
-    fastestLapsForTrackCarDriver[0].laptime === currentLap.laptime ||
-    fastestLapsForTrackCar[0].laptime < currentLap.laptime
+    lapsForTrackCarDriver[0]._id === currentLap._id ||
+    lapsForTrackCarDriver[0].laptime === currentLap.laptime ||
+    lapsForTrackCar[0].laptime < currentLap.laptime
   ) {
     return diffToFormattedTime(
-      lapToMillis(currentLap.laptime) -
-        lapToMillis(fastestLapsForTrackCar[0].laptime)
-    );
+      lapToMillis(currentLap.laptime) - lapToMillis(lapsForTrackCar[0].laptime)
+    )
   }
 
-  return null;
-};
+  return null
+}
 
 export const generateSplitToSlowerLap = (laps: Lap[], currentLap: Lap) => {
-  if (!currentLap.laptime || currentLap.laptime.length < 9) return null;
-
-  let fastestLaps = sortByLaptime(laps);
-
-  let fastestLapsForTrack = fastestLaps.filter(
-    (lap: Lap) => lap.track === currentLap.track
-  );
-
-  if (fastestLapsForTrack.length === 0) return null;
-  else if (
-    currentLap._id !== fastestLapsForTrack[0]._id &&
-    currentLap.laptime < fastestLapsForTrack[0].laptime
-  ) {
-    return diffToFormattedTime(
-      lapToMillis(fastestLapsForTrack[0].laptime) -
-        lapToMillis(currentLap.laptime)
-    );
-  } else if (
-    (fastestLapsForTrack[0]._id === currentLap._id ||
-      fastestLapsForTrack[0].laptime === currentLap.laptime) &&
-    fastestLapsForTrack.length > 1
-  ) {
-    return diffToFormattedTime(
-      lapToMillis(fastestLapsForTrack[1].laptime) -
-        lapToMillis(currentLap.laptime)
-    );
+  if (!currentLap.laptime || currentLap.laptime.length < 9) {
+    return null
   }
 
-  let fastestLapsForTrackCar = fastestLapsForTrack.filter(
-    (lap: Lap) => lap.car === currentLap.car
-  );
+  const fastestLaps = sortByLaptime(laps)
 
-  if (fastestLapsForTrackCar.length === 0) return null;
-  else if (
-    currentLap._id !== fastestLapsForTrackCar[0]._id &&
-    currentLap.laptime < fastestLapsForTrackCar[0].laptime
-  ) {
-    return diffToFormattedTime(
-      lapToMillis(fastestLapsForTrackCar[0].laptime) -
-        lapToMillis(currentLap.laptime)
-    );
+  const lapsForTrack = getLapsForTrack(fastestLaps, currentLap.trackId)
+
+  if (lapsForTrack.length === 0) {
+    return null
   } else if (
-    (fastestLapsForTrackCar[0]._id === currentLap._id ||
-      fastestLapsForTrackCar[0].laptime === currentLap.laptime) &&
-    fastestLapsForTrackCar.length > 1
+    currentLap._id !== lapsForTrack[0]._id &&
+    currentLap.laptime < lapsForTrack[0].laptime
   ) {
     return diffToFormattedTime(
-      lapToMillis(fastestLapsForTrackCar[1].laptime) -
-        lapToMillis(currentLap.laptime)
-    );
+      lapToMillis(lapsForTrack[0].laptime) - lapToMillis(currentLap.laptime)
+    )
+  } else if (
+    (lapsForTrack[0]._id === currentLap._id ||
+      lapsForTrack[0].laptime === currentLap.laptime) &&
+    lapsForTrack.length > 1
+  ) {
+    return diffToFormattedTime(
+      lapToMillis(lapsForTrack[1].laptime) - lapToMillis(currentLap.laptime)
+    )
   }
 
-  let fastestLapsForTrackCarDriver = fastestLapsForTrackCar.filter(
-    (lap: Lap) => lap.driver === currentLap.driver
-  );
+  const lapsForTrackCar = getLapsForCar(lapsForTrack, currentLap.carId)
 
-  if (fastestLapsForTrackCarDriver.length === 0) return null;
+  if (lapsForTrackCar.length === 0) return null
   else if (
-    currentLap._id !== fastestLapsForTrackCarDriver[0]._id &&
-    currentLap.laptime < fastestLapsForTrackCarDriver[0].laptime
+    currentLap._id !== lapsForTrackCar[0]._id &&
+    currentLap.laptime < lapsForTrackCar[0].laptime
   ) {
     return diffToFormattedTime(
-      lapToMillis(fastestLapsForTrackCarDriver[0].laptime) -
-        lapToMillis(currentLap.laptime)
-    );
+      lapToMillis(lapsForTrackCar[0].laptime) - lapToMillis(currentLap.laptime)
+    )
   } else if (
-    (fastestLapsForTrackCarDriver[0]._id === currentLap._id ||
-      fastestLapsForTrackCarDriver[0].laptime === currentLap.laptime) &&
-    fastestLapsForTrackCarDriver.length > 1
+    (lapsForTrackCar[0]._id === currentLap._id ||
+      lapsForTrackCar[0].laptime === currentLap.laptime) &&
+    lapsForTrackCar.length > 1
   ) {
     return diffToFormattedTime(
-      lapToMillis(fastestLapsForTrackCarDriver[1].laptime) -
-        lapToMillis(currentLap.laptime)
-    );
+      lapToMillis(lapsForTrackCar[1].laptime) - lapToMillis(currentLap.laptime)
+    )
   }
 
-  return null;
-};
+  const lapsForTrackCarDriver = getLapsForDriver(
+    lapsForTrackCar,
+    currentLap.driverId
+  )
+
+  if (lapsForTrackCarDriver.length === 0) {
+    return null
+  } else if (
+    currentLap._id !== lapsForTrackCarDriver[0]._id &&
+    currentLap.laptime < lapsForTrackCarDriver[0].laptime
+  ) {
+    return diffToFormattedTime(
+      lapToMillis(lapsForTrackCarDriver[0].laptime) -
+        lapToMillis(currentLap.laptime)
+    )
+  } else if (
+    (lapsForTrackCarDriver[0]._id === currentLap._id ||
+      lapsForTrackCarDriver[0].laptime === currentLap.laptime) &&
+    lapsForTrackCarDriver.length > 1
+  ) {
+    return diffToFormattedTime(
+      lapToMillis(lapsForTrackCarDriver[1].laptime) -
+        lapToMillis(currentLap.laptime)
+    )
+  }
+
+  return null
+}
 
 const lapToMillis = (laptime: string) => {
-  const fasterLapSplit = laptime.split(':');
+  const fasterLapSplit = laptime.split(':')
 
-  const fasterMin = parseInt(fasterLapSplit[0]);
-  const fasterSec = parseInt(fasterLapSplit[1].split('.')[0]);
-  const fasterMilli = parseInt(fasterLapSplit[1].split('.')[1]);
+  const fasterMin = parseInt(fasterLapSplit[0])
+  const fasterSec = parseInt(fasterLapSplit[1].split('.')[0])
+  const fasterMilli = parseInt(fasterLapSplit[1].split('.')[1])
 
-  return fasterMin * 60 * 1000 + fasterSec * 1000 + fasterMilli;
-};
+  return fasterMin * 60 * 1000 + fasterSec * 1000 + fasterMilli
+}
 
 const diffToTime = (difference: number) => {
-  let min, sec, mil;
+  let min, sec, mil
 
-  min = Math.floor(difference / 1000 / 60);
-  sec = Math.floor((difference / 1000 / 60 - min) * 60);
-  mil = Math.floor(((difference / 1000 / 60 - min) * 60 - sec) * 1000);
+  min = Math.floor(difference / 1000 / 60)
+  sec = Math.floor((difference / 1000 / 60 - min) * 60)
+  mil = Math.floor(((difference / 1000 / 60 - min) * 60 - sec) * 1000)
 
-  return { min, sec, mil };
-};
+  return { min, sec, mil }
+}
 
 const diffToFormattedTime = (difference: number) => {
-  const { min, sec, mil } = diffToTime(difference);
+  const { min, sec, mil } = diffToTime(difference)
 
   return (
     (min < 10 ? '0' + min : min) +
@@ -241,5 +249,5 @@ const diffToFormattedTime = (difference: number) => {
     '.' +
     (mil < 100 ? '0' : '') +
     (mil < 10 ? '0' + mil : mil)
-  );
-};
+  )
+}
