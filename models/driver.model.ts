@@ -4,8 +4,8 @@ const Schema = mongoose.Schema
 
 const driverSchema = new Schema(
   {
-    groupId: {
-      type: String,
+    groupIds: {
+      type: [String],
     },
     name: {
       type: String,

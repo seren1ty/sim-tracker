@@ -14,17 +14,25 @@ export default async function handler(
     method,
   } = req
 
+  const queryId = id as string
+
   await dbConnect()
 
   switch (method) {
-    case 'GET': // Get group by id
-      Group.findById(id)
-        .then((group) => res.json(group))
-        .catch((err) => res.status(400).json('Error [Get Group]: ' + err))
+    case 'GET':
+      if (queryId?.includes(',')) {
+        Group.find({ _id: { $in: queryId.split(',') } }) // Get groups by ids
+          .then((groups) => res.json(groups))
+          .catch((err) => res.status(400).json('Error [Get Groups]: ' + err))
+      } else {
+        Group.findById(queryId) // Get group by id
+          .then((group) => res.json(group))
+          .catch((err) => res.status(400).json('Error [Get Group]: ' + err))
+      }
       break
 
     case 'PUT': // Edit group
-      Group.findByIdAndUpdate(id, {
+      Group.findByIdAndUpdate(queryId, {
         name: req.body.name,
         code: req.body.code,
         description: req.body.description,
@@ -37,7 +45,7 @@ export default async function handler(
       break
 
     case 'DELETE': // Delete group
-      Group.findByIdAndDelete(id)
+      Group.findByIdAndDelete(queryId)
         .then((group) => res.json(group))
         .catch((err) => res.status(400).json('Error [Delete Group]: ' + err))
       break

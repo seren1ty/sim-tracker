@@ -1,80 +1,84 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage';
-import { State } from '@/types';
-import axios from 'axios';
+import React, { useState, useEffect, useRef } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/router'
+import { getAcTrackerState, setAcTrackerState } from '@/utils/ac-localStorage'
+import { State } from '@/types'
+import axios from 'axios'
 
 type ContextProps = {
-  children: React.ReactNode;
-};
+  children: React.ReactNode
+}
 
-const StateContext = React.createContext<State | null>(null);
+const StateContext = React.createContext<State | null>(null)
 
 const StateProvider = ({ children }: ContextProps) => {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession()
 
-  const router = useRouter();
+  const router = useRouter()
 
-  const [showMobile, setShowMobile] = useState(false);
+  const [showMobile, setShowMobile] = useState(false)
 
-  const [loading, setLoading] = useState(false);
+  const [loadingGame, setLoadingGame] = useState(false)
+
+  const [loading, setLoading] = useState(false)
 
   const [group, setGroup] = useState(() => {
-    return !!getAcTrackerState() ? getAcTrackerState().group : null;
-  });
+    return !!getAcTrackerState() ? getAcTrackerState().group : null
+  })
 
   const [game, setGame] = useState(() => {
-    return !!getAcTrackerState() ? getAcTrackerState().game : null;
-  });
+    return !!getAcTrackerState() ? getAcTrackerState().game : null
+  })
 
   const [driver, setDriver] = useState(() => {
-    return !!getAcTrackerState() ? getAcTrackerState().driver : null;
-  });
+    return !!getAcTrackerState() ? getAcTrackerState().driver : null
+  })
 
   useEffect(() => {
-    setAcTrackerState({ ...getAcTrackerState(), group: group });
-  }, [group]);
+    setAcTrackerState({ ...getAcTrackerState(), group: group })
+  }, [group])
 
   useEffect(() => {
-    setAcTrackerState({ ...getAcTrackerState(), game: game });
-  }, [game]);
+    setAcTrackerState({ ...getAcTrackerState(), game: game })
+  }, [game])
 
   useEffect(() => {
-    setAcTrackerState({ ...getAcTrackerState(), driver: driver });
-  }, [driver]);
+    setAcTrackerState({ ...getAcTrackerState(), driver: driver })
+  }, [driver])
 
   // Detect end of session and redirect to login
   useEffect(() => {
     if (status !== 'authenticated' && status !== 'loading' && !session) {
-      console.error('Session expired');
-      router.push('/login');
+      console.error('Session expired')
+      router.push('/login')
     }
-  }, [session]);
+  }, [session])
 
   // Detect new session redirect to main page
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       if (status === 'authenticated') {
         const res = await axios.get(
           '/api/drivers/email/' + session?.user?.email
-        );
-        setDriver(res.data);
+        )
+        setDriver(res.data)
 
-        router.push('/');
+        router.push('/')
       }
-    })();
-  }, [status]);
+    })()
+  }, [status])
 
   return (
     <StateContext.Provider
       value={{
         showMobile,
+        loadingGame,
         loading,
         group,
         game,
         driver,
         setShowMobile,
+        setLoadingGame,
         setLoading,
         setGroup,
         setGame,
@@ -83,7 +87,7 @@ const StateProvider = ({ children }: ContextProps) => {
     >
       {children}
     </StateContext.Provider>
-  );
-};
+  )
+}
 
-export { StateContext, StateProvider };
+export { StateContext, StateProvider }
