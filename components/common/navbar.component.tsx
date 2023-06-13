@@ -21,29 +21,100 @@ const Navbar = () => {
   const [groups, setGroups] = useState<Group[] | null>(null)
   const [games, setGames] = useState<Game[] | null>(null)
 
-  /* const [group, setGroup] = useState(() => {
-        return session?.group ? session.group : undefined;
-    }); */
+  // const [group, setGroup] = useState(() => {
+  //   return state?.group
+  //     ? state.group
+  //     : // TODO Remove and init without hardcoded server value
+  //       {
+  //         _id: '604d68c1fd8e9726c8f8dd8f',
+  //         name: 'DriftJockeys',
+  //         code: 'DJ',
+  //         ownerId: '5f90064a452b8f9c34a1ea3d',
+  //         driverIds: [
+  //           '5f90064a452b8f9c34a1ea3d',
+  //           '5f90065e452b8f9c34a1ea3e',
+  //           '5f900668452b8f9c34a1ea3f',
+  //         ],
+  //       }
+  // })
 
-  const [game, setGame] = useState(() => {
-    return state?.game
-      ? state.game
-      : // TODO Remove and init without hardcoded server value
-        { _id: '5ff02ceaeff1fa286892c01a', name: 'Assetto Corsa', code: 'AC' }
-  })
+  // const [game, setGame] = useState(() => {
+  //   return state?.game
+  //     ? state.game
+  //     : // TODO Remove and init without hardcoded server value
+  //       { _id: '5ff02ceaeff1fa286892c01a', name: 'Assetto Corsa', code: 'AC' }
+  // })
 
   useEffect(() => {
-    //initGroups();
-    initGames()
+    if (state?.driver) {
+      initGroups(state?.driver?.groupIds)
 
-    // Backup check for mobile blocking initial request
-    setTimeout(() => {
-      //if (!groups) initGroups();
+      // Backup check for mobile blocking initial request
+      setTimeout(() => {
+        if (!state?.driver) {
+          return
+        }
 
-      if (!games) initGames()
-    }, 2000)
+        if (!groups) {
+          initGroups(state.driver.groupIds)
+        }
+      }, 2000)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state?.driver])
+
+  useEffect(() => {
+    if (state?.group) {
+      initGames(state?.group._id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.group])
+
+  const initGroups = (groupIds: string[]) => {
+    if (!session || !session.user) {
+      return
+    }
+
+    axios
+      .get('/api/groups/' + groupIds)
+      .then((res) => {
+        setGroups(res.data)
+
+        if (!state?.group && !!res.data.length) {
+          state?.setGroup(res.data[0])
+          return res.data[0]
+        } else if (state?.group) {
+          initGames(state?.group._id)
+        }
+      })
+      //.then((group: Group) => initGames(group._id))
+      .catch((err) => {
+        console.error(err)
+      })
+  }
+
+  const initGames = (groupId: string) => {
+    if (!session || !session.user) {
+      return
+    }
+
+    axios
+      .get('/api/games/group/' + groupId)
+      .then((res) => {
+        setGames(res.data)
+
+        if (!res.data.length) {
+          state?.setGame(null)
+        }
+
+        if (!state?.game) {
+          state?.setGame(res.data[0])
+        }
+      })
+      .catch((err) => {
+        console.error(err)
+      })
+  }
 
   useEffect(() => {
     const handleResize = () => {
@@ -60,55 +131,26 @@ const Navbar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const initGroups = () => {
-    if (!session || !session.user) {
-      return
-    }
-
-    axios
-      .get('/api/groups')
-      .then((res) => {
-        setGroups(res.data)
-
-        if (!state?.group && !!res.data.length) {
-          state?.setGroup(res.data[0])
-        }
-      })
-      .catch((err) => {
-        console.error(err)
-      })
-  }
-
-  const initGames = () => {
-    if (!session || !session.user) {
-      return
-    }
-
-    axios
-      .get('/api/games')
-      .then((res) => {
-        setGames(res.data)
-
-        if (!state?.game && !!res.data.length) {
-          state?.setGame(res.data[0])
-        }
-      })
-      .catch((err) => {
-        console.error(err)
-      })
-  }
-
   const openAdmin = () => {
     router.push('/admin')
   }
 
-  /* const onChangeGroup = (groupEvent: React.ChangeEvent<HTMLSelectElement>) => {
-        setGroup(groupEvent.target.value);
+  const onChangeGroup = (groupEvent: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedGroup = groups?.find((g) => g._id === groupEvent.target.value)
 
-        session?.setGroup(groupEvent.target.value);
+    if (!selectedGroup) {
+      return
+    }
 
-        setAcTrackerState({ ...getAcTrackerState(), group: groupEvent.target.value });
-    } */
+    //setGroup(selectedGroup)
+
+    state?.setGroup(selectedGroup)
+
+    setAcTrackerState({
+      ...getAcTrackerState(),
+      group: selectedGroup,
+    })
+  }
 
   const onChangeGame = (gameEvent: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedGame = games?.find((g) => g._id === gameEvent.target.value)
@@ -117,7 +159,7 @@ const Navbar = () => {
       return
     }
 
-    setGame(selectedGame)
+    //setGame(selectedGame)
 
     state?.setGame(selectedGame)
 
@@ -164,11 +206,12 @@ const Navbar = () => {
             <Tooltip id="admin" place="left" />
           </span>
         )}
+
         <span>
           <select
             className="game-select"
             onChange={onChangeGame}
-            value={game._id}
+            value={state?.game?._id}
           >
             {!!games &&
               games.map((game: Game) => {
@@ -180,17 +223,24 @@ const Navbar = () => {
               })}
           </select>
         </span>
-        {/* <span>
-            <select className="group-select" onChange={onChangeGroup} value={group}>
-            {
-                !!groups &&
-                groups.map((group: Group) => {
-                    return <option key={group._id} value={group.name}>{ showMobile ? group.code : group.name }</option>
-                })
-            }
-            </select>
-          </span>
-        */}
+
+        <span>
+          <select
+            className="group-select"
+            onChange={onChangeGroup}
+            value={state?.group?._id}
+          >
+            {!!groups &&
+              groups.map((group: Group) => {
+                return (
+                  <option key={group._id} value={group._id}>
+                    {state?.showMobile ? group.code : group.name}
+                  </option>
+                )
+              })}
+          </select>
+        </span>
+
         <span>
           <button
             className="nav-link nav-item btn btn-link logout-btn"
