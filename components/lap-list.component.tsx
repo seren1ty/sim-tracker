@@ -33,29 +33,35 @@ const LapList: React.FC = () => {
   useEffect(() => {
     handleLoadData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, state?.group, state?.game])
+  }, [status, state?.game])
 
   const handleLoadData = () => {
-    if (!session || !session.user || !state) {
+    if (
+      !session ||
+      !session.user ||
+      !state ||
+      !state.group ||
+      !state.game ||
+      state.loading
+    ) {
+      setLaps([])
       return
     }
 
     state.setLoading(true)
 
-    axios
+    const lapsPromise = axios
       .get('/api/laps/game/' + state.game?._id)
       .then((res) => {
         setOriginalLaps(res.data)
 
         handleSetLaps(res.data)
-
-        state.setLoading(false)
       })
       .catch((err) => {
         console.error(err)
       })
 
-    axios
+    const tracksPromise = axios
       .get('/api/tracks/game/' + state.game?._id)
       .then((res) => {
         handleSetTracks(res.data)
@@ -64,7 +70,7 @@ const LapList: React.FC = () => {
         console.error(err)
       })
 
-    axios
+    const carsPromise = axios
       .get('/api/cars/game/' + state.game?._id)
       .then((res) => {
         handleSetCars(res.data)
@@ -73,7 +79,7 @@ const LapList: React.FC = () => {
         console.error(err)
       })
 
-    axios
+    const driversPromise = axios
       .get('/api/drivers')
       .then((res) => {
         handleSetDrivers(res.data)
@@ -81,6 +87,12 @@ const LapList: React.FC = () => {
       .catch((err) => {
         console.error(err)
       })
+
+    Promise.all([lapsPromise, tracksPromise, carsPromise, driversPromise]).then(
+      () => {
+        state.setLoading(false)
+      }
+    )
   }
 
   const handleSetLaps = (newLaps: Lap[]) => {

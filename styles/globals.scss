@@ -31,8 +31,14 @@ body {
         padding: 8px 4px;
       }
 
-      .banner-right .game-select {
-        margin: 5px 10px 5px 0;
+      .banner-right {
+        .group-select {
+          margin: 5px 10px 5px 0;
+        }
+
+        .game-select {
+          margin: 5px 10px 5px 0;
+        }
       }
     }
 
@@ -96,6 +102,10 @@ body {
   @media (max-width: 767px) {
     .banner .banner-right {
       .game-select {
+        margin: 7px 10px 5px 0;
+      }
+
+      .group-select {
         margin: 7px 10px 5px 0;
       }
 
@@ -238,6 +248,16 @@ body {
     }
 
     .game-select {
+      line-height: 55px;
+      margin: 5px 20px 5px 0;
+      padding: 8px 2px 8px 2px;
+      color: #007bff;
+      border: 1px solid #ced4da;
+      border-radius: 0.25rem;
+      outline: none;
+    }
+
+    .group-select {
       line-height: 55px;
       margin: 5px 20px 5px 0;
       padding: 8px 2px 8px 2px;
