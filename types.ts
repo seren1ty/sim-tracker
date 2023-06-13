@@ -22,14 +22,16 @@ export type AcTrackerGameState = {
 
 export type State = {
   showMobile: boolean
+  loadingGame: boolean
   loading: boolean
   group: Group | null
   game: Game | null
   driver: Driver | null
   setShowMobile: (showMobile: boolean) => void
+  setLoadingGame: (loading: boolean) => void
   setLoading: (loading: boolean) => void
   setGroup: (group: Group) => void
-  setGame: (game: Game) => void
+  setGame: (game: Game | null) => void
   setDriver: (driver: Driver | null) => void
 }
 
@@ -93,7 +95,7 @@ export type Car = {
 export type DriverDocument = MongooseDocument<Driver> & Driver
 export type Driver = {
   _id: string
-  groupId: string
+  groupIds: string[]
   name: string
   isAdmin: boolean
   email?: string
