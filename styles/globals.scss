@@ -269,8 +269,19 @@ body {
     flex-wrap: wrap;
     justify-content: space-around;
 
+    @media (max-width: 768px) {
+      justify-content: center;
+      padding: 0;
+    }
+
     .col-2 {
       min-width: 450px;
+
+      @media (max-width: 768px) {
+        min-width: 100%;
+        max-width: 100%;
+        justify-content: center;
+      }
 
       &.col-2-a {
         text-align: center;
@@ -279,6 +290,11 @@ body {
           font-family: 'Prompt', sans-serif;
           font-size: 54px;
           line-height: 50px;
+
+          @media (max-width: 415px) {
+            font-size: 44px;
+            line-height: 35px;
+          }
 
           &.title-line-1 {
             padding-bottom: 20px;
@@ -291,10 +307,24 @@ body {
         }
       }
 
+      &.col-2-b {
+        img {
+          @media (max-width: 768px) {
+            min-width: 100%;
+            max-width: 100%;
+            justify-content: center;
+          }
+        }
+      }
+
       img {
         max-width: 100%;
         margin: 20px 0;
         border-radius: 15px;
+
+        @media (max-width: 768px) {
+          max-width: 420px;
+        }
       }
     }
   }
@@ -304,6 +334,10 @@ body {
   display: flex;
   justify-content: center;
   margin-top: 80px;
+
+  @media (max-width: 415px) {
+    margin-top: 50px;
+  }
 
   button {
     width: 225px;
