@@ -20,6 +20,7 @@ const Navbar = () => {
 
   const [groups, setGroups] = useState<Group[] | null>(null)
   const [games, setGames] = useState<Game[] | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   // const [group, setGroup] = useState(() => {
   //   return state?.group
@@ -170,7 +171,42 @@ const Navbar = () => {
     await signOut()
 
     state?.setDriver(null)
+    setIsMenuOpen(false)
   }
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+
+  const closeMenu = () => {
+    setIsMenuOpen(false)
+  }
+
+  // Close menu when route changes
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setIsMenuOpen(false)
+    }
+
+    router.events?.on('routeChangeStart', handleRouteChange)
+
+    return () => {
+      router.events?.off('routeChangeStart', handleRouteChange)
+    }
+  }, [router.events])
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = 'unset'
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset'
+    }
+  }, [isMenuOpen])
 
   if (router.pathname.startsWith('/login')) {
     return (
@@ -187,7 +223,9 @@ const Navbar = () => {
           SimTracker
         </Link>
       </div>
-      <div className="banner-right">
+
+      {/* Desktop navigation - hidden on mobile */}
+      <div className="banner-right desktop-nav">
         {!!state && state?.driver?.isAdmin && (
           <span>
             <button
@@ -258,6 +296,102 @@ const Navbar = () => {
           <Tooltip id="logout" place="left" />
         </span>
       </div>
+
+      {/* Hamburger menu button - visible only on mobile */}
+      <button
+        className="hamburger-btn"
+        onClick={toggleMenu}
+        aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+      >
+        <div className={`hamburger-icon ${isMenuOpen ? 'open' : ''}`}>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
+
+      {/* Mobile menu overlay */}
+      {isMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={closeMenu}>
+          <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+            <div className="mobile-menu-content">
+              {/* Game Select */}
+              <div className="mobile-menu-item">
+                <label className="mobile-menu-label">Game</label>
+                <select
+                  className="mobile-game-select"
+                  onChange={(e) => {
+                    onChangeGame(e)
+                    closeMenu()
+                  }}
+                  value={state?.game?._id}
+                >
+                  {!!games &&
+                    games.map((game: Game) => {
+                      return (
+                        <option key={game._id} value={game._id}>
+                          {game.name}
+                        </option>
+                      )
+                    })}
+                </select>
+              </div>
+
+              {/* Group Select */}
+              <div className="mobile-menu-item">
+                <label className="mobile-menu-label">Group</label>
+                <select
+                  className="mobile-group-select"
+                  onChange={(e) => {
+                    onChangeGroup(e)
+                    closeMenu()
+                  }}
+                  value={state?.group?._id}
+                >
+                  {!!groups &&
+                    groups.map((group: Group) => {
+                      return (
+                        <option key={group._id} value={group._id}>
+                          {group.name}
+                        </option>
+                      )
+                    })}
+                </select>
+              </div>
+
+              {/* Admin Button */}
+              {!!state && state?.driver?.isAdmin && (
+                <button
+                  className="mobile-menu-btn admin-btn"
+                  onClick={() => {
+                    openAdmin()
+                    closeMenu()
+                  }}
+                >
+                  <Image
+                    src={adminImg}
+                    alt="admin"
+                    className="mobile-menu-icon"
+                    priority
+                  />
+                  <span>Admin</span>
+                </button>
+              )}
+
+              {/* Logout Button */}
+              <button className="mobile-menu-btn logout-btn" onClick={logout}>
+                <Image
+                  src={logoutImg}
+                  alt="logout"
+                  className="mobile-menu-icon"
+                  priority
+                />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

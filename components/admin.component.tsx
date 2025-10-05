@@ -249,7 +249,7 @@ const Admin = () => {
         ...drivers,
         {
           _id: result._id,
-          groupId: state?.group?._id || '',
+          groupIds: state?.group?._id ? [state.group._id] : [],
           name: result.name,
           isAdmin: false,
         },
