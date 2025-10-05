@@ -212,7 +212,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 20px;
 }
 
 .banner {
@@ -625,6 +625,9 @@ body {
 
   .lap-add-holder {
     float: right;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .add-lap-btn {
@@ -632,6 +635,39 @@ body {
     border-color: #007bffc9;
     padding: 4px 14px;
     margin: 0 5px 5px 0;
+  }
+
+  .add-lap-icon-btn {
+    display: none;
+    background-color: transparent;
+    border: transparent;
+    outline: none;
+    margin-right: 8px;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: 991px) {
+      display: flex;
+    }
+  }
+
+  .add-lap-icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    opacity: 0.84;
+
+    &:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
   }
 
   .lap-filter-labels > span > label {

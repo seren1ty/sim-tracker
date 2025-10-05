@@ -3,6 +3,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
 import { isBefore, isAfter } from 'date-fns'
+import { Tooltip } from 'react-tooltip'
 import LapItem from './lap-list/lap-item.component'
 import { StateContext } from '@/context/state.context'
 import {
@@ -13,6 +14,8 @@ import {
 import { Car, Driver, HoveredLap, Lap, Track } from '@/types'
 import { getGameState, setGameState } from '@/utils/ac-localStorage'
 import SkeletonLaps from './skeleton/skeleton-laps.component'
+import Image from 'next/image'
+import addIconImg from '@/public/add_blue.png'
 
 const LapList: React.FC = () => {
   const state = useContext(StateContext)
@@ -368,6 +371,20 @@ const LapList: React.FC = () => {
             >
               Add New Lap
             </button>
+            <button
+              className="add-lap-icon-btn"
+              data-tooltip-content="Add New Lap"
+              data-tooltip-id="add-lap"
+              onClick={onClickAdd}
+            >
+              <Image
+                src={addIconImg}
+                alt="add-lap-icon"
+                className="add-lap-icon"
+                priority
+              />
+            </button>
+            <Tooltip id="add-lap" place="left" />
           </span>
         </div>
         {!state || state.loading ? (
