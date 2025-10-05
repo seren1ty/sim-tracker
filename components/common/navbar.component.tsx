@@ -22,30 +22,6 @@ const Navbar = () => {
   const [games, setGames] = useState<Game[] | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
-  // const [group, setGroup] = useState(() => {
-  //   return state?.group
-  //     ? state.group
-  //     : // TODO Remove and init without hardcoded server value
-  //       {
-  //         _id: '604d68c1fd8e9726c8f8dd8f',
-  //         name: 'DriftJockeys',
-  //         code: 'DJ',
-  //         ownerId: '5f90064a452b8f9c34a1ea3d',
-  //         driverIds: [
-  //           '5f90064a452b8f9c34a1ea3d',
-  //           '5f90065e452b8f9c34a1ea3e',
-  //           '5f900668452b8f9c34a1ea3f',
-  //         ],
-  //       }
-  // })
-
-  // const [game, setGame] = useState(() => {
-  //   return state?.game
-  //     ? state.game
-  //     : // TODO Remove and init without hardcoded server value
-  //       { _id: '5ff02ceaeff1fa286892c01a', name: 'Assetto Corsa', code: 'AC' }
-  // })
-
   useEffect(() => {
     if (state?.driver) {
       initGroups(state?.driver?.groupIds)
@@ -88,7 +64,6 @@ const Navbar = () => {
           initGames(state?.group._id)
         }
       })
-      //.then((group: Group) => initGames(group._id))
       .catch((err) => {
         console.error(err)
       })
@@ -143,8 +118,6 @@ const Navbar = () => {
       return
     }
 
-    //setGroup(selectedGroup)
-
     state?.setGroup(selectedGroup)
 
     setAcTrackerState({
@@ -159,8 +132,6 @@ const Navbar = () => {
     if (!selectedGame) {
       return
     }
-
-    //setGame(selectedGame)
 
     state?.setGame(selectedGame)
 
