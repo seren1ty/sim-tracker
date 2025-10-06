@@ -36,6 +36,13 @@ const mockLap = {
   notes: '',
 }
 
+const mockSessionDriver = {
+  _id: 'driver1',
+  name: 'Jimmy',
+  groupIds: ['group1'],
+  isAdmin: false,
+}
+
 const mockDeleteLap = jest.fn()
 const mockOnClose = jest.fn()
 
@@ -54,10 +61,125 @@ describe('LapMobileActions', () => {
     jest.clearAllMocks()
   })
 
+  describe('Permission Checks', () => {
+    it('shows Edit and Delete buttons only for current user\'s laps', () => {
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={mockSessionDriver}
+          lap={mockLap}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.getByText('Edit')).toBeInTheDocument()
+      expect(screen.getByText('Delete')).toBeInTheDocument()
+    })
+
+    it('hides Edit and Delete buttons for other users\' laps', () => {
+      const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={differentDriver}
+          lap={mockLap}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+      expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+      // Replay and Cancel should still be visible
+      expect(screen.getByText('Replay')).toBeInTheDocument()
+      expect(screen.getByText('Cancel')).toBeInTheDocument()
+    })
+
+    it('hides Edit and Delete buttons when sessionDriver is null', () => {
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={null}
+          lap={mockLap}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+      expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+      // Replay and Cancel should still be visible
+      expect(screen.getByText('Replay')).toBeInTheDocument()
+      expect(screen.getByText('Cancel')).toBeInTheDocument()
+    })
+
+    it('always shows Replay button regardless of lap ownership', () => {
+      const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={differentDriver}
+          lap={mockLap}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.getByText('Replay')).toBeInTheDocument()
+    })
+
+    it('always shows Cancel button regardless of lap ownership', () => {
+      const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={differentDriver}
+          lap={mockLap}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.getByText('Cancel')).toBeInTheDocument()
+    })
+
+    it('shows only Replay and Cancel for non-owner when lap has replay', () => {
+      const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={differentDriver}
+          lap={mockLap}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.getByText('Replay')).toBeInTheDocument()
+      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+      expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+    })
+
+    it('shows only Cancel for non-owner when lap has no replay', () => {
+      const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
+      const lapWithoutReplay = { ...mockLap, replay: '' }
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={differentDriver}
+          lap={lapWithoutReplay}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.queryByText('Replay')).not.toBeInTheDocument()
+      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+      expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+    })
+  })
+
   describe('Initial View - Lap with Replay', () => {
     it('renders all four buttons when lap has replay', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -73,6 +195,7 @@ describe('LapMobileActions', () => {
     it('Replay button has correct CSS class', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -86,6 +209,7 @@ describe('LapMobileActions', () => {
     it('opens replay in new window when Replay is clicked', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -103,6 +227,7 @@ describe('LapMobileActions', () => {
       const mockStopPropagation = jest.fn()
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -125,6 +250,7 @@ describe('LapMobileActions', () => {
     it('renders only three buttons when lap has no replay', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={lapWithoutReplay}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -140,6 +266,7 @@ describe('LapMobileActions', () => {
     it('does not call window.open when no replay URL', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={lapWithoutReplay}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -158,6 +285,7 @@ describe('LapMobileActions', () => {
     it('navigates to edit page when Edit is clicked', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -179,6 +307,7 @@ describe('LapMobileActions', () => {
     it('Edit button has correct CSS class', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -193,6 +322,7 @@ describe('LapMobileActions', () => {
       const mockStopPropagation = jest.fn()
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -213,6 +343,7 @@ describe('LapMobileActions', () => {
     it('shows delete confirmation when Delete is clicked', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -234,6 +365,7 @@ describe('LapMobileActions', () => {
     it('Delete button in initial view has correct CSS class', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -247,6 +379,7 @@ describe('LapMobileActions', () => {
     it('Delete confirm button has correct CSS class', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -263,6 +396,7 @@ describe('LapMobileActions', () => {
     it('calls deleteLap and onClose when delete is confirmed', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -284,6 +418,7 @@ describe('LapMobileActions', () => {
     it('returns to initial view when Cancel is clicked in delete confirmation', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -307,6 +442,7 @@ describe('LapMobileActions', () => {
     it('does not call deleteLap when Cancel is clicked', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -328,6 +464,7 @@ describe('LapMobileActions', () => {
       const mockStopPropagation = jest.fn()
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -348,6 +485,7 @@ describe('LapMobileActions', () => {
     it('calls onClose when Cancel is clicked in initial view', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -363,6 +501,7 @@ describe('LapMobileActions', () => {
     it('Cancel button in initial view has correct CSS class', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -377,6 +516,7 @@ describe('LapMobileActions', () => {
       const mockStopPropagation = jest.fn()
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -397,6 +537,7 @@ describe('LapMobileActions', () => {
     it('renders as a table cell with correct colspan', () => {
       const { container } = renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -410,6 +551,7 @@ describe('LapMobileActions', () => {
     it('has correct CSS class for the cell', () => {
       const { container } = renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -423,6 +565,7 @@ describe('LapMobileActions', () => {
     it('contains a container div with correct class', () => {
       const { container } = renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -438,6 +581,7 @@ describe('LapMobileActions', () => {
     it('displays buttons in correct order with replay: Replay, Edit, Delete, Cancel', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -455,6 +599,7 @@ describe('LapMobileActions', () => {
       const lapWithoutReplay = { ...mockLap, replay: '' }
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={lapWithoutReplay}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}
@@ -470,6 +615,7 @@ describe('LapMobileActions', () => {
     it('displays delete confirmation buttons in correct order: Delete, Cancel', () => {
       renderInTable(
         <LapMobileActions
+          sessionDriver={mockSessionDriver}
           lap={mockLap}
           deleteLap={mockDeleteLap}
           onClose={mockOnClose}

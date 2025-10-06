@@ -68,9 +68,18 @@ const LapItem = (props: LapItemProps) => {
     return lap.replay && state?.showMobile
   }
 
+  const shouldEnableMobileActions = () => {
+    // Only enable mobile actions if there's at least one meaningful action
+    // (not just Cancel button)
+    const hasReplay = !!lap.replay
+    const canEdit = state?.driver?.name === lap.driver
+    return hasReplay || canEdit
+  }
+
   const onClickLapRow = () => {
     // In mobile mode, toggle the overlay actions instead of opening replay
-    if (state?.showMobile) {
+    // Only if there are meaningful actions available
+    if (state?.showMobile && shouldEnableMobileActions()) {
       props.onToggleMobileActions(props.showMobileActions ? null : lap._id)
     }
   }
@@ -86,6 +95,7 @@ const LapItem = (props: LapItemProps) => {
     >
       {props.showMobileActions && state?.showMobile ? (
         <LapMobileActions
+          sessionDriver={state?.driver}
           lap={lap}
           deleteLap={props.deleteLap}
           onClose={closeMobileActions}
