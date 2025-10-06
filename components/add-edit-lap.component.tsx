@@ -491,7 +491,7 @@ const AddEditLap: React.FC = () => {
           <div className="ae-form-container">
             <form onSubmit={onSubmit}>
               <div className="row mt-4">
-                <div className="col pr-4">
+                <div className={`col ${state?.showMobile ? 'pr-1' : 'pr-4'}`}>
                   <div className="form-group">
                     <label className="add-edit-label-with-button">Track</label>
                     {!addTrackInProgress ? (
@@ -587,7 +587,7 @@ const AddEditLap: React.FC = () => {
                 </div>
               </div>
               <div className="row mt-0">
-                <div className="col pr-4">
+                <div className={`col ${state?.showMobile ? 'pr-0' : 'pr-4'}`}>
                   <div className="form-group">
                     <label className="add-edit-label">Laptime</label>
                     <input
@@ -623,7 +623,7 @@ const AddEditLap: React.FC = () => {
                 </div>
               </div>
               <div className="row mt-0">
-                <div className="col mr-3 pr-2">
+                <div className={`col ${state?.showMobile ? 'mr-1 pr-0' : 'mr-3 pr-2'}`}>
                   <div className="form-group">
                     <label className="add-edit-label">Gearbox</label>
                     <select
@@ -637,7 +637,7 @@ const AddEditLap: React.FC = () => {
                     </select>
                   </div>
                 </div>
-                <div className="col mr-3 pr-2">
+                <div className={`col ${state?.showMobile ? 'mr-1 pr-0' : 'mr-3 pr-2'}`}>
                   <div className="form-group">
                     <label className="add-edit-label">Traction</label>
                     <select
@@ -681,7 +681,7 @@ const AddEditLap: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <div className="col-8 pl-4 pr-0">
+                <div className={`col-8 ${state?.showMobile ? 'pl-0' : 'pl-4'} pr-0`}>
                   <div className="form-group">
                     <label className="add-edit-label">Replay</label>
                     <input
