@@ -30,6 +30,7 @@ const LapList: React.FC = () => {
   const [drivers, setDrivers] = useState<Driver[]>([])
 
   const [hoveredLap, setHoveredLap] = useState<HoveredLap | null>(null)
+  const [mobileActionsLapId, setMobileActionsLapId] = useState<string | null>(null)
 
   const router = useRouter()
 
@@ -354,6 +355,10 @@ const LapList: React.FC = () => {
     setHoveredLap(currHoveredLap)
   }
 
+  const onToggleMobileActions = (lapId: string | null) => {
+    setMobileActionsLapId(lapId)
+  }
+
   if (status !== 'authenticated') {
     return null
   }
@@ -490,6 +495,8 @@ const LapList: React.FC = () => {
                     key={lap._id}
                     onHover={onHoverLap}
                     hoveredLap={hoveredLap}
+                    showMobileActions={mobileActionsLapId === lap._id}
+                    onToggleMobileActions={onToggleMobileActions}
                   />
                 ))}
               </tbody>

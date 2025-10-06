@@ -5,6 +5,7 @@ import { Tooltip } from 'react-tooltip'
 import { StateContext } from '@/context/state.context'
 import Laptime from '@/components/common/laptime.component'
 import LapActions from './lap-actions.component'
+import LapMobileActions from './lap-mobile-actions.component'
 import { HoveredLap, Lap } from '@/types'
 import { getGameState } from '@/utils/ac-localStorage'
 import Image from 'next/image'
@@ -19,11 +20,15 @@ type LapItemProps = {
   isPersonalLapRecordForCar: (currentLap: Lap) => boolean
   deleteLap: (_id: string) => void
   onHover: (hoveredLapData: HoveredLap | null) => void
+  showMobileActions: boolean
+  onToggleMobileActions: (lapId: string | null) => void
 }
 
 const LapItem = (props: LapItemProps) => {
   const [lap, setLap] = useState<Lap>(props.lap)
   const [isLapHovered, setIsLapHovered] = useState<boolean>(false)
+
+  const state = useContext(StateContext)
 
   useEffect(() => {
     lap.isLapRecord = props.isLapRecord(lap)
@@ -38,8 +43,6 @@ const LapItem = (props: LapItemProps) => {
     setIsLapHovered(!!props.hoveredLap)
     // eslint-disable-next-line
   }, [props.hoveredLap])
-
-  const state = useContext(StateContext)
 
   const highlightDriversLap = () => {
     return shownLapsAreNotLimitedToCurrentDriver() && lapIsForCurrentDriver()
@@ -66,97 +69,112 @@ const LapItem = (props: LapItemProps) => {
   }
 
   const onClickLapRow = () => {
-    if (enabledMobileReplay()) {
-      window.open(lap.replay)
+    // In mobile mode, toggle the overlay actions instead of opening replay
+    if (state?.showMobile) {
+      props.onToggleMobileActions(props.showMobileActions ? null : lap._id)
     }
+  }
+
+  const closeMobileActions = () => {
+    props.onToggleMobileActions(null)
   }
 
   return (
     <tr
-      className={'lap-row ' + (highlightDriversLap() ? 'drivers-lap' : '')}
+      className={'lap-row ' + (highlightDriversLap() ? 'drivers-lap' : '') + (props.showMobileActions ? ' mobile-actions-active' : '')}
       onClick={() => onClickLapRow()}
     >
-      <td className={enabledMobileReplay() ? 'has-replay' : ''}>
-        <span
-          className={
-            isLapDataHovered('Track', lap.trackId) ? 'text-strong' : ''
-          }
-          onMouseEnter={() =>
-            props.onHover({ _id: lap._id, type: 'Track', data: lap.trackId })
-          }
-          onMouseLeave={() => props.onHover(null)}
-        >
-          <Truncator id={'track_' + lap._id} value={lap.track} max={20} />
-        </span>
-      </td>
-      <td className="lap-car-cell">
-        <span
-          className={isLapDataHovered('Car', lap.carId) ? 'text-strong' : ''}
-          onMouseEnter={() =>
-            props.onHover({ _id: lap._id, type: 'Car', data: lap.carId })
-          }
-          onMouseLeave={() => props.onHover(null)}
-        >
-          <Truncator id={'car_' + lap._id} value={lap.car} max={25} />
-        </span>
-      </td>
-      <td className="lap-replay-cell sub-item">
-        {lap.replay && (
-          <span>
-            <a
-              href={lap.replay}
-              target="_"
-              data-tooltip-content="Launch Replay"
-              data-tooltip-id={'replay_' + lap._id}
-            >
-              <Image
-                src={replayImg}
-                alt="replay"
-                className="lap-replay-icon"
-                priority
-              />
-            </a>
-            <Tooltip id={'replay_' + lap._id} place="left" />
-          </span>
-        )}
-      </td>
-      <td>
-        <Laptime lap={lap} />
-      </td>
-      <td>{lap.driver}</td>
-      <td className="sub-item">
-        {lap.gearbox === 'Manual' ? 'Manual' : 'Auto'}
-      </td>
-      <td className="sub-item">{lap.traction}</td>
-      <td className="sub-item">{lap.stability}</td>
-      <td className="lap-date-cell">
-        <AcDate date={lap.date} />
-      </td>
-      <td className="lap-notes-cell sub-item">
-        {lap.notes && (
-          <span>
-            <span
-              data-tooltip-content={lap.notes}
-              data-tooltip-id={'notes_' + lap._id}
-            >
-              <Image
-                src={notesImg}
-                alt="notes"
-                className="lap-notes-icon"
-                priority
-              />
-            </span>
-            <Tooltip id={'notes_' + lap._id} place="left" />
-          </span>
-        )}
-      </td>
-      <td className="lap-row-actions sub-item">
-        <LapActions
-          sessionDriver={state?.driver}
+      {props.showMobileActions && state?.showMobile ? (
+        <LapMobileActions
           lap={lap}
           deleteLap={props.deleteLap}
+          onClose={closeMobileActions}
         />
-      </td>
+      ) : (
+        <>
+          <td className={enabledMobileReplay() ? 'has-replay' : ''}>
+            <span
+              className={
+                isLapDataHovered('Track', lap.trackId) ? 'text-strong' : ''
+              }
+              onMouseEnter={() =>
+                props.onHover({ _id: lap._id, type: 'Track', data: lap.trackId })
+              }
+              onMouseLeave={() => props.onHover(null)}
+            >
+              <Truncator id={'track_' + lap._id} value={lap.track} max={20} />
+            </span>
+          </td>
+          <td className="lap-car-cell">
+            <span
+              className={isLapDataHovered('Car', lap.carId) ? 'text-strong' : ''}
+              onMouseEnter={() =>
+                props.onHover({ _id: lap._id, type: 'Car', data: lap.carId })
+              }
+              onMouseLeave={() => props.onHover(null)}
+            >
+              <Truncator id={'car_' + lap._id} value={lap.car} max={25} />
+            </span>
+          </td>
+          <td className="lap-replay-cell sub-item">
+            {lap.replay && (
+              <span>
+                <a
+                  href={lap.replay}
+                  target="_"
+                  data-tooltip-content="Launch Replay"
+                  data-tooltip-id={'replay_' + lap._id}
+                >
+                  <Image
+                    src={replayImg}
+                    alt="replay"
+                    className="lap-replay-icon"
+                    priority
+                  />
+                </a>
+                <Tooltip id={'replay_' + lap._id} place="left" />
+              </span>
+            )}
+          </td>
+          <td>
+            <Laptime lap={lap} />
+          </td>
+          <td>{lap.driver}</td>
+          <td className="sub-item">
+            {lap.gearbox === 'Manual' ? 'Manual' : 'Auto'}
+          </td>
+          <td className="sub-item">{lap.traction}</td>
+          <td className="sub-item">{lap.stability}</td>
+          <td className="lap-date-cell">
+            <AcDate date={lap.date} />
+          </td>
+          <td className="lap-notes-cell sub-item">
+            {lap.notes && (
+              <span>
+                <span
+                  data-tooltip-content={lap.notes}
+                  data-tooltip-id={'notes_' + lap._id}
+                >
+                  <Image
+                    src={notesImg}
+                    alt="notes"
+                    className="lap-notes-icon"
+                    priority
+                  />
+                </span>
+                <Tooltip id={'notes_' + lap._id} place="left" />
+              </span>
+            )}
+          </td>
+          <td className="lap-row-actions sub-item">
+            <LapActions
+              sessionDriver={state?.driver}
+              lap={lap}
+              deleteLap={props.deleteLap}
+            />
+          </td>
+        </>
+      )}
     </tr>
   )
 }
