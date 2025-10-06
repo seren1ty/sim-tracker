@@ -266,6 +266,47 @@ describe('LapItem', () => {
     expect(defaultProps.onToggleMobileActions).not.toHaveBeenCalled()
   })
 
+  test('clicking lap row in mobile mode does nothing when user does not own lap and no replay exists', () => {
+    const mobileContext = { ...mockStateContext, showMobile: true }
+    const differentDriver = { ...mockStateContext.driver, name: 'Bobby' }
+    const contextWithDifferentDriver = { ...mobileContext, driver: differentDriver }
+    const lapWithoutReplay = { ...mockLap, replay: '' }
+    const props = { ...defaultProps, lap: lapWithoutReplay }
+
+    const { container } = renderWithContext(<LapItem {...props} />, contextWithDifferentDriver)
+
+    const row = container.querySelector('.lap-row')
+    fireEvent.click(row)
+
+    expect(props.onToggleMobileActions).not.toHaveBeenCalled()
+  })
+
+  test('clicking lap row in mobile mode works when user does not own lap but replay exists', () => {
+    const mobileContext = { ...mockStateContext, showMobile: true }
+    const differentDriver = { ...mockStateContext.driver, name: 'Bobby' }
+    const contextWithDifferentDriver = { ...mobileContext, driver: differentDriver }
+
+    const { container } = renderWithContext(<LapItem {...defaultProps} />, contextWithDifferentDriver)
+
+    const row = container.querySelector('.lap-row')
+    fireEvent.click(row)
+
+    expect(defaultProps.onToggleMobileActions).toHaveBeenCalledWith('123abc')
+  })
+
+  test('clicking lap row in mobile mode works when user owns lap but no replay exists', () => {
+    const mobileContext = { ...mockStateContext, showMobile: true }
+    const lapWithoutReplay = { ...mockLap, replay: '' }
+    const props = { ...defaultProps, lap: lapWithoutReplay }
+
+    const { container } = renderWithContext(<LapItem {...props} />, mobileContext)
+
+    const row = container.querySelector('.lap-row')
+    fireEvent.click(row)
+
+    expect(props.onToggleMobileActions).toHaveBeenCalledWith('123abc')
+  })
+
   test('adds has-replay class to first cell when replay exists in mobile mode', () => {
     const mobileContext = { ...mockStateContext, showMobile: true }
     const { container } = renderWithContext(<LapItem {...defaultProps} />, mobileContext)

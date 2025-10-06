@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/router'
-import { Lap } from '@/types'
+import { Driver, Lap } from '@/types'
 
 type LapMobileActionsProps = {
+  sessionDriver: Driver | null | undefined
   lap: Lap
   deleteLap: (id: string) => void
   onClose: () => void
@@ -52,6 +53,9 @@ const LapMobileActions = (props: LapMobileActionsProps) => {
     props.onClose()
   }
 
+  // Only show edit/delete for user's own laps
+  const canEditLap = props.sessionDriver?.name === props.lap.driver
+
   return (
     <td className="lap-mobile-actions-cell" colSpan={10}>
       <div className="lap-mobile-actions-container">
@@ -65,18 +69,22 @@ const LapMobileActions = (props: LapMobileActionsProps) => {
                 Replay
               </div>
             )}
-            <div
-              className="lap-mobile-action lap-mobile-edit"
-              onClick={onClickEdit}
-            >
-              Edit
-            </div>
-            <div
-              className="lap-mobile-action lap-mobile-delete"
-              onClick={onClickDelete}
-            >
-              Delete
-            </div>
+            {canEditLap && (
+              <>
+                <div
+                  className="lap-mobile-action lap-mobile-edit"
+                  onClick={onClickEdit}
+                >
+                  Edit
+                </div>
+                <div
+                  className="lap-mobile-action lap-mobile-delete"
+                  onClick={onClickDelete}
+                >
+                  Delete
+                </div>
+              </>
+            )}
             <button
               className="lap-mobile-cancel-link"
               onClick={onClickCancel}
