@@ -89,7 +89,7 @@ const LapMobileActions = (props: LapMobileActionsProps) => {
               className="lap-mobile-cancel-link"
               onClick={onClickCancel}
             >
-              Cancel
+              Close
             </button>
           </>
         ) : (
