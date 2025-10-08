@@ -89,9 +89,9 @@ describe('LapMobileActions', () => {
 
       expect(screen.queryByText('Edit')).not.toBeInTheDocument()
       expect(screen.queryByText('Delete')).not.toBeInTheDocument()
-      // Replay and Cancel should still be visible
+      // Replay and Close should still be visible
       expect(screen.getByText('Replay')).toBeInTheDocument()
-      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
     })
 
     it('hides Edit and Delete buttons when sessionDriver is null', () => {
@@ -106,9 +106,9 @@ describe('LapMobileActions', () => {
 
       expect(screen.queryByText('Edit')).not.toBeInTheDocument()
       expect(screen.queryByText('Delete')).not.toBeInTheDocument()
-      // Replay and Cancel should still be visible
+      // Replay and Close should still be visible
       expect(screen.getByText('Replay')).toBeInTheDocument()
-      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
     })
 
     it('always shows Replay button regardless of lap ownership', () => {
@@ -125,7 +125,7 @@ describe('LapMobileActions', () => {
       expect(screen.getByText('Replay')).toBeInTheDocument()
     })
 
-    it('always shows Cancel button regardless of lap ownership', () => {
+    it('always shows Close button regardless of lap ownership', () => {
       const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
       renderInTable(
         <LapMobileActions
@@ -136,10 +136,10 @@ describe('LapMobileActions', () => {
         />
       )
 
-      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
     })
 
-    it('shows only Replay and Cancel for non-owner when lap has replay', () => {
+    it('shows only Replay and Close for non-owner when lap has replay', () => {
       const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
       renderInTable(
         <LapMobileActions
@@ -151,12 +151,12 @@ describe('LapMobileActions', () => {
       )
 
       expect(screen.getByText('Replay')).toBeInTheDocument()
-      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
       expect(screen.queryByText('Edit')).not.toBeInTheDocument()
       expect(screen.queryByText('Delete')).not.toBeInTheDocument()
     })
 
-    it('shows only Cancel for non-owner when lap has no replay', () => {
+    it('shows only Close for non-owner when lap has no replay', () => {
       const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
       const lapWithoutReplay = { ...mockLap, replay: '' }
       renderInTable(
@@ -169,14 +169,14 @@ describe('LapMobileActions', () => {
       )
 
       expect(screen.queryByText('Replay')).not.toBeInTheDocument()
-      expect(screen.getByText('Cancel')).toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
       expect(screen.queryByText('Edit')).not.toBeInTheDocument()
       expect(screen.queryByText('Delete')).not.toBeInTheDocument()
     })
   })
 
   describe('Initial View - Lap with Replay', () => {
-    it('renders all four buttons when lap has replay', () => {
+    it('renders all four buttons when lap has replay and user owns lap', () => {
       renderInTable(
         <LapMobileActions
           sessionDriver={mockSessionDriver}
@@ -189,7 +189,7 @@ describe('LapMobileActions', () => {
       expect(screen.getByText('Replay')).toBeInTheDocument()
       expect(screen.getByText('Edit')).toBeInTheDocument()
       expect(screen.getByText('Delete')).toBeInTheDocument()
-      expect(screen.getAllByText('Cancel')[0]).toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
     })
 
     it('Replay button has correct CSS class', () => {
@@ -247,7 +247,7 @@ describe('LapMobileActions', () => {
   describe('Initial View - Lap without Replay', () => {
     const lapWithoutReplay = { ...mockLap, replay: '' }
 
-    it('renders only three buttons when lap has no replay', () => {
+    it('renders only three buttons when lap has no replay and user owns lap', () => {
       renderInTable(
         <LapMobileActions
           sessionDriver={mockSessionDriver}
@@ -260,7 +260,24 @@ describe('LapMobileActions', () => {
       expect(screen.queryByText('Replay')).not.toBeInTheDocument()
       expect(screen.getByText('Edit')).toBeInTheDocument()
       expect(screen.getByText('Delete')).toBeInTheDocument()
-      expect(screen.getAllByText('Cancel')[0]).toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
+    })
+
+    it('shows only Close when lap has no replay and user does not own lap', () => {
+      const differentDriver = { ...mockSessionDriver, name: 'Bobby' }
+      renderInTable(
+        <LapMobileActions
+          sessionDriver={differentDriver}
+          lap={lapWithoutReplay}
+          deleteLap={mockDeleteLap}
+          onClose={mockOnClose}
+        />
+      )
+
+      expect(screen.queryByText('Replay')).not.toBeInTheDocument()
+      expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+      expect(screen.queryByText('Delete')).not.toBeInTheDocument()
+      expect(screen.getByText('Close')).toBeInTheDocument()
     })
 
     it('does not call window.open when no replay URL', () => {
@@ -481,8 +498,8 @@ describe('LapMobileActions', () => {
     })
   })
 
-  describe('Cancel Functionality', () => {
-    it('calls onClose when Cancel is clicked in initial view', () => {
+  describe('Close Functionality', () => {
+    it('calls onClose when Close is clicked in initial view', () => {
       renderInTable(
         <LapMobileActions
           sessionDriver={mockSessionDriver}
@@ -492,13 +509,13 @@ describe('LapMobileActions', () => {
         />
       )
 
-      const cancelButtons = screen.getAllByText('Cancel')
-      fireEvent.click(cancelButtons[0])
+      const closeButton = screen.getByText('Close')
+      fireEvent.click(closeButton)
 
       expect(mockOnClose).toHaveBeenCalled()
     })
 
-    it('Cancel button in initial view has correct CSS class', () => {
+    it('Close button in initial view has correct CSS class', () => {
       renderInTable(
         <LapMobileActions
           sessionDriver={mockSessionDriver}
@@ -508,11 +525,11 @@ describe('LapMobileActions', () => {
         />
       )
 
-      const cancelButtons = screen.getAllByText('Cancel')
-      expect(cancelButtons[0]).toHaveClass('lap-mobile-cancel-link')
+      const closeButton = screen.getByText('Close')
+      expect(closeButton).toHaveClass('lap-mobile-cancel-link')
     })
 
-    it('stops event propagation when Cancel is clicked in initial view', () => {
+    it('stops event propagation when Close is clicked in initial view', () => {
       const mockStopPropagation = jest.fn()
       renderInTable(
         <LapMobileActions
@@ -523,11 +540,11 @@ describe('LapMobileActions', () => {
         />
       )
 
-      const cancelButton = screen.getAllByText('Cancel')[0]
+      const closeButton = screen.getByText('Close')
       const event = new MouseEvent('click', { bubbles: true })
       event.stopPropagation = mockStopPropagation
 
-      fireEvent(cancelButton, event)
+      fireEvent(closeButton, event)
 
       expect(mockStopPropagation).toHaveBeenCalled()
     })
@@ -578,7 +595,7 @@ describe('LapMobileActions', () => {
   })
 
   describe('Button Order', () => {
-    it('displays buttons in correct order with replay: Replay, Edit, Delete, Cancel', () => {
+    it('displays buttons in correct order with replay: Replay, Edit, Delete, Close', () => {
       renderInTable(
         <LapMobileActions
           sessionDriver={mockSessionDriver}
@@ -588,14 +605,14 @@ describe('LapMobileActions', () => {
         />
       )
 
-      const buttons = screen.getAllByText(/Replay|Edit|Delete|Cancel/)
+      const buttons = screen.getAllByText(/Replay|Edit|Delete|Close/)
       expect(buttons[0]).toHaveTextContent('Replay')
       expect(buttons[1]).toHaveTextContent('Edit')
       expect(buttons[2]).toHaveTextContent('Delete')
-      expect(buttons[3]).toHaveTextContent('Cancel')
+      expect(buttons[3]).toHaveTextContent('Close')
     })
 
-    it('displays buttons in correct order without replay: Edit, Delete, Cancel', () => {
+    it('displays buttons in correct order without replay: Edit, Delete, Close', () => {
       const lapWithoutReplay = { ...mockLap, replay: '' }
       renderInTable(
         <LapMobileActions
@@ -606,10 +623,10 @@ describe('LapMobileActions', () => {
         />
       )
 
-      const buttons = screen.getAllByText(/Edit|Delete|Cancel/)
+      const buttons = screen.getAllByText(/Edit|Delete|Close/)
       expect(buttons[0]).toHaveTextContent('Edit')
       expect(buttons[1]).toHaveTextContent('Delete')
-      expect(buttons[2]).toHaveTextContent('Cancel')
+      expect(buttons[2]).toHaveTextContent('Close')
     })
 
     it('displays delete confirmation buttons in correct order: Delete, Cancel', () => {
