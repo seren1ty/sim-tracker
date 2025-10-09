@@ -94,8 +94,11 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 390) {
+      // Minimum width at which desktop lap actions no longer display
+      if (window.innerWidth < 992) {
         state?.setShowMobile(true)
+      } else {
+        state?.setShowMobile(false)
       }
     }
 
