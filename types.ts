@@ -27,12 +27,16 @@ export type State = {
   group: Group | null
   game: Game | null
   driver: Driver | null
+  refreshGroups: number  // Increment to trigger navbar groups reload
+  refreshGames: number   // Increment to trigger navbar games reload
   setShowMobile: (showMobile: boolean) => void
   setLoadingGame: (loading: boolean) => void
   setLoading: (loading: boolean) => void
   setGroup: (group: Group) => void
   setGame: (game: Game | null) => void
   setDriver: (driver: Driver | null) => void
+  triggerRefreshGroups: () => void  // Call to reload groups in navbar
+  triggerRefreshGames: () => void   // Call to reload games in navbar
 }
 
 type MongooseDocument<T> = {
@@ -57,8 +61,8 @@ export type Lap = {
   traction: string
   stability: string
   date: Date
-  replay: string
-  notes: string
+  replay?: string
+  notes?: string
 
   isLapRecord?: boolean
   isLapRecordForCar?: boolean

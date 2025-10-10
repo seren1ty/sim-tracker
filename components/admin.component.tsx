@@ -6,6 +6,8 @@ import { StateContext } from '@/context/state.context'
 import AdminDataAdd from './admin/admin-data-add.component'
 import AdminDataAddDriver from './admin/admin-data-add-driver.component'
 import AdminDataAddGroup from './admin/admin-data-add-group.component'
+import AdminDataEditDriver from './admin/admin-data-edit-driver.component'
+import AdminDataEditGroup from './admin/admin-data-edit-group.component'
 import AdminDataBoxes from './admin/admin-data-boxes.component'
 import { Car, Driver, Game, Group, NewDriver, NewGroup, Track } from '@/types'
 import Image from 'next/image'
@@ -18,6 +20,10 @@ const Admin = () => {
 
   const [dataType, setDataType] = useState('Tracks')
   const [showAdd, setShowAdd] = useState(false)
+  const [showEditDriver, setShowEditDriver] = useState(false)
+  const [editingDriver, setEditingDriver] = useState<Driver | null>(null)
+  const [showEditGroup, setShowEditGroup] = useState(false)
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null)
 
   const [tracks, setTracks] = useState<Track[]>([])
   const [cars, setCars] = useState<Car[]>([])
@@ -143,6 +149,10 @@ const Admin = () => {
     setDataType(event.target.value)
 
     setShowAdd(false)
+    setShowEditDriver(false)
+    setEditingDriver(null)
+    setShowEditGroup(false)
+    setEditingGroup(null)
   }
 
   const calculateTotal = () => {
@@ -323,23 +333,185 @@ const Admin = () => {
   }
 
   const updateTrack = (newTrack: Track) => {
-    console.log(newTrack)
+    if (!state) return
+
+    state.setLoading(true)
+
+    axios
+      .patch('/api/tracks/' + newTrack._id, { name: newTrack.name })
+      .then((res) => {
+        const updatedTracks = tracks.map((track) =>
+          track._id === res.data._id ? { ...track, name: newTrack.name } : track
+        )
+
+        updatedTracks.sort((a, b) => {
+          return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        })
+
+        setTracks(updatedTracks)
+      })
+      .catch((err) => {
+        console.error('Error updating track:', err)
+      })
+      .finally(() => {
+        state.setLoading(false)
+      })
   }
 
   const updateCar = (newCar: Car) => {
-    console.log(newCar)
+    if (!state) return
+
+    state.setLoading(true)
+
+    axios
+      .patch('/api/cars/' + newCar._id, { name: newCar.name })
+      .then((res) => {
+        const updatedCars = cars.map((car) =>
+          car._id === res.data._id ? { ...car, name: newCar.name } : car
+        )
+
+        updatedCars.sort((a, b) => {
+          return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        })
+
+        setCars(updatedCars)
+      })
+      .catch((err) => {
+        console.error('Error updating car:', err)
+      })
+      .finally(() => {
+        state.setLoading(false)
+      })
   }
 
   const updateDriver = (newDriver: Driver) => {
-    console.log(newDriver)
+    if (!state) return
+
+    state.setLoading(true)
+
+    axios
+      .patch('/api/drivers/' + newDriver._id, {
+        name: newDriver.name,
+        email: newDriver.email,
+        isAdmin: newDriver.isAdmin,
+      })
+      .then((res) => {
+        const updatedDrivers = drivers.map((driver) =>
+          driver._id === res.data._id
+            ? {
+                ...driver,
+                name: newDriver.name,
+                email: newDriver.email,
+                isAdmin: newDriver.isAdmin,
+              }
+            : driver
+        )
+
+        updatedDrivers.sort((a, b) => {
+          return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        })
+
+        setDrivers(updatedDrivers)
+        setShowEditDriver(false)
+        setEditingDriver(null)
+      })
+      .catch((err) => {
+        console.error('Error updating driver:', err)
+      })
+      .finally(() => {
+        state.setLoading(false)
+      })
   }
 
   const updateGame = (newGame: Game) => {
-    console.log(newGame)
+    if (!state) return
+
+    state.setLoading(true)
+
+    axios
+      .patch('/api/games/' + newGame._id, { name: newGame.name })
+      .then((res) => {
+        const updatedGames = games.map((game) =>
+          game._id === res.data._id ? { ...game, name: newGame.name } : game
+        )
+
+        updatedGames.sort((a, b) => {
+          return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        })
+
+        setGames(updatedGames)
+
+        // Trigger navbar to reload games list
+        state.triggerRefreshGames()
+      })
+      .catch((err) => {
+        console.error('Error updating game:', err)
+      })
+      .finally(() => {
+        state.setLoading(false)
+      })
   }
 
   const updateGroup = (newGroup: Group) => {
-    console.log(newGroup)
+    if (!state) return
+
+    state.setLoading(true)
+
+    axios
+      .patch('/api/groups/' + newGroup._id, {
+        name: newGroup.name,
+        code: newGroup.code,
+        description: newGroup.description,
+      })
+      .then((res) => {
+        const updatedGroups = groups.map((group) =>
+          group._id === res.data._id
+            ? {
+                ...group,
+                name: newGroup.name,
+                code: newGroup.code,
+                description: newGroup.description,
+              }
+            : group
+        )
+
+        updatedGroups.sort((a, b) => {
+          return a.name > b.name ? 1 : b.name > a.name ? -1 : 0
+        })
+
+        setGroups(updatedGroups)
+        setShowEditGroup(false)
+        setEditingGroup(null)
+
+        // Trigger navbar to reload groups list
+        state.triggerRefreshGroups()
+      })
+      .catch((err) => {
+        console.error('Error updating group:', err)
+      })
+      .finally(() => {
+        state.setLoading(false)
+      })
+  }
+
+  const startEditDriver = (driver: Driver) => {
+    setEditingDriver(driver)
+    setShowEditDriver(true)
+  }
+
+  const cancelEditDriver = () => {
+    setShowEditDriver(false)
+    setEditingDriver(null)
+  }
+
+  const startEditGroup = (group: Group) => {
+    setEditingGroup(group)
+    setShowEditGroup(true)
+  }
+
+  const cancelEditGroup = () => {
+    setShowEditGroup(false)
+    setEditingGroup(null)
   }
 
   const deleteTrack = (track: Track, index: number) => {
@@ -509,6 +681,7 @@ const Admin = () => {
             {dataType === 'Tracks' && (
               <AdminDataBoxes
                 data={tracks}
+                dataType={dataType}
                 onUpdate={updateTrack}
                 onDelete={deleteTrack}
                 showAdd={showAdd}
@@ -517,6 +690,7 @@ const Admin = () => {
             {dataType === 'Cars' && (
               <AdminDataBoxes
                 data={cars}
+                dataType={dataType}
                 onUpdate={updateCar}
                 onDelete={deleteCar}
                 showAdd={showAdd}
@@ -525,14 +699,26 @@ const Admin = () => {
             {dataType === 'Drivers' && (
               <AdminDataBoxes
                 data={drivers}
-                onUpdate={updateDriver}
+                dataType={dataType}
+                onUpdate={startEditDriver}
                 onDelete={deleteDriver}
-                showAdd={showAdd}
+                showAdd={showAdd || showEditDriver}
+                editingItemId={editingDriver?._id}
+                editComponent={
+                  editingDriver && (
+                    <AdminDataEditDriver
+                      driver={editingDriver}
+                      onSave={updateDriver}
+                      onCancel={cancelEditDriver}
+                    />
+                  )
+                }
               />
             )}
             {dataType === 'Games' && (
               <AdminDataBoxes
                 data={games}
+                dataType={dataType}
                 onUpdate={updateGame}
                 onDelete={deleteGame}
                 showAdd={showAdd}
@@ -541,9 +727,20 @@ const Admin = () => {
             {dataType === 'Groups' && (
               <AdminDataBoxes
                 data={groups}
-                onUpdate={updateGroup}
+                dataType={dataType}
+                onUpdate={startEditGroup}
                 onDelete={deleteGroup}
-                showAdd={showAdd}
+                showAdd={showAdd || showEditGroup}
+                editingItemId={editingGroup?._id}
+                editComponent={
+                  editingGroup && (
+                    <AdminDataEditGroup
+                      group={editingGroup}
+                      onSave={updateGroup}
+                      onCancel={cancelEditGroup}
+                    />
+                  )
+                }
               />
             )}
           </div>

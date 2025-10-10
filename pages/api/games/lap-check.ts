@@ -20,6 +20,11 @@ export default async function handler(
       Game.find()
         .collation({ locale: 'en', strength: 2 })
         .then((games) => {
+          // Handle empty array case
+          if (games.length === 0) {
+            return res.json([])
+          }
+
           let newGames: GameDocument[] = []
 
           games.forEach((game) => {

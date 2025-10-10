@@ -23,6 +23,11 @@ export default async function handler(
       Track.find({ gameId })
         .collation({ locale: 'en', strength: 2 })
         .then((tracks) => {
+          // Handle empty array case
+          if (tracks.length === 0) {
+            return res.json([])
+          }
+
           let newTracks: TrackDocument[] = []
 
           tracks.forEach((track) => {

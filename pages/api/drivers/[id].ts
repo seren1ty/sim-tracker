@@ -24,11 +24,29 @@ export default async function handler(
         .catch((err) => res.status(400).json('Error [Get Driver]: ' + err));
       break;
 
-    case 'PUT': // Edit driver
+    case 'PUT': // Edit driver (full update)
       Driver.findByIdAndUpdate(id, { name: req.body.name })
         .then((driver) => res.json(driver))
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Driver]: ' + err)
+        );
+      break;
+
+    case 'PATCH': // Edit driver (admin mode - name, email, isAdmin)
+      // Only allow updating specific fields from admin mode
+      // Protected fields: groupIds
+      const updateData: any = {};
+      if (req.body.name !== undefined) updateData.name = req.body.name;
+      if (req.body.email !== undefined) updateData.email = req.body.email;
+      if (req.body.isAdmin !== undefined) updateData.isAdmin = req.body.isAdmin;
+
+      Driver.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+      })
+        .then((driver) => res.json(driver))
+        .catch((err: Error) =>
+          res.status(400).json('Error [Patch Driver]: ' + err)
         );
       break;
 

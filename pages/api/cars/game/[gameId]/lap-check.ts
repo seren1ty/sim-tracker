@@ -23,6 +23,11 @@ export default async function handler(
       Car.find({ gameId })
         .collation({ locale: 'en', strength: 2 })
         .then((cars) => {
+          // Handle empty array case
+          if (cars.length === 0) {
+            return res.json([])
+          }
+
           let newCars: CarDocument[] = []
 
           cars.forEach((car) => {

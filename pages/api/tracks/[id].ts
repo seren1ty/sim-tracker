@@ -23,7 +23,7 @@ export default async function handler(
         .catch((err) => res.status(400).json('Error [Get Track]: ' + err))
       break
 
-    case 'PUT': // Edit track
+    case 'PUT': // Edit track (full update)
       Track.findByIdAndUpdate(id, {
         groupId: req.body.groupId,
         gameId: req.body.gameId,
@@ -33,6 +33,20 @@ export default async function handler(
         .then((track) => res.json(track))
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Track]: ' + err)
+        )
+      break
+
+    case 'PATCH': // Edit track (admin mode - name only)
+      // Only allow updating the name field from admin mode
+      // Protected fields: groupId, gameId, game
+      Track.findByIdAndUpdate(
+        id,
+        { name: req.body.name },
+        { new: true, runValidators: true }
+      )
+        .then((track) => res.json(track))
+        .catch((err: Error) =>
+          res.status(400).json('Error [Patch Track]: ' + err)
         )
       break
 

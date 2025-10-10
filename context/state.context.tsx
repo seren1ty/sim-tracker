@@ -34,6 +34,12 @@ const StateProvider = ({ children }: ContextProps) => {
     return !!getAcTrackerState() ? getAcTrackerState().driver : null
   })
 
+  const [refreshGroups, setRefreshGroups] = useState(0)
+  const [refreshGames, setRefreshGames] = useState(0)
+
+  const triggerRefreshGroups = () => setRefreshGroups((prev) => prev + 1)
+  const triggerRefreshGames = () => setRefreshGames((prev) => prev + 1)
+
   useEffect(() => {
     setAcTrackerState({ ...getAcTrackerState(), group: group })
   }, [group])
@@ -77,12 +83,16 @@ const StateProvider = ({ children }: ContextProps) => {
         group,
         game,
         driver,
+        refreshGroups,
+        refreshGames,
         setShowMobile,
         setLoadingGame,
         setLoading,
         setGroup,
         setGame,
         setDriver,
+        triggerRefreshGroups,
+        triggerRefreshGames,
       }}
     >
       {children}
