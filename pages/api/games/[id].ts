@@ -23,11 +23,25 @@ export default async function handler(
         .catch((err) => res.status(400).json('Error [Get Game]: ' + err));
       break;
 
-    case 'PUT': // Edit game
+    case 'PUT': // Edit game (full update)
       Game.findByIdAndUpdate(id, { name: req.body.name })
         .then((game) => res.json(game))
         .catch((err: Error) =>
           res.status(400).json('Error [Edit Game]: ' + err)
+        );
+      break;
+
+    case 'PATCH': // Edit game (admin mode - name only)
+      // Only allow updating the name field from admin mode
+      // Protected fields: groupId, code
+      Game.findByIdAndUpdate(
+        id,
+        { name: req.body.name },
+        { new: true, runValidators: true }
+      )
+        .then((game) => res.json(game))
+        .catch((err: Error) =>
+          res.status(400).json('Error [Patch Game]: ' + err)
         );
       break;
 

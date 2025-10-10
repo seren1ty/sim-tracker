@@ -20,6 +20,11 @@ export default async function handler(
       Driver.find()
         .collation({ locale: 'en', strength: 2 })
         .then((drivers) => {
+          // Handle empty array case
+          if (drivers.length === 0) {
+            return res.json([])
+          }
+
           let newDrivers: DriverDocument[] = []
 
           drivers.forEach((driver) => {

@@ -47,6 +47,22 @@ const Navbar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state?.group])
 
+  // Reload groups when triggered from admin panel
+  useEffect(() => {
+    if (state?.driver && state.refreshGroups > 0) {
+      initGroups(state.driver.groupIds)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.refreshGroups])
+
+  // Reload games when triggered from admin panel
+  useEffect(() => {
+    if (state?.group && state.refreshGames > 0) {
+      initGames(state.group._id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.refreshGames])
+
   const initGroups = (groupIds: string[]) => {
     if (!session || !session.user) {
       return

@@ -23,7 +23,7 @@ export default async function handler(
         .catch((err) => res.status(400).json('Error [Get Car]: ' + err))
       break
 
-    case 'PUT': // Edit car
+    case 'PUT': // Edit car (full update)
       Car.findByIdAndUpdate(id, {
         groupId: req.body.groupId,
         gameId: req.body.gameId,
@@ -32,6 +32,20 @@ export default async function handler(
       })
         .then((car) => res.json(car))
         .catch((err: Error) => res.status(400).json('Error [Edit Car]: ' + err))
+      break
+
+    case 'PATCH': // Edit car (admin mode - name only)
+      // Only allow updating the name field from admin mode
+      // Protected fields: groupId, gameId, game
+      Car.findByIdAndUpdate(
+        id,
+        { name: req.body.name },
+        { new: true, runValidators: true }
+      )
+        .then((car) => res.json(car))
+        .catch((err: Error) =>
+          res.status(400).json('Error [Patch Car]: ' + err)
+        )
       break
 
     case 'DELETE': // Delete car
