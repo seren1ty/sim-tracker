@@ -127,6 +127,7 @@ export type Group = {
   description: string
   ownerId: string
   driverIds: string[]
+  hasGames?: boolean
 }
 
 export type NewGroup = {
