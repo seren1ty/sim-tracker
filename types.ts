@@ -81,7 +81,6 @@ export type Track = {
   _id: string
   groupId: string
   gameId: string
-  game: string
   name: string
   hasLaps?: boolean
 }
@@ -91,7 +90,6 @@ export type Car = {
   _id: string
   groupId: string
   gameId: string
-  game: string
   name: string
   hasLaps?: boolean
 }

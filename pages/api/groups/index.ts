@@ -1,8 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Group from '@/models/group.model'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { GroupDocument } from '@/types'
+import { getAllGroups, handleGroupAdd } from '@/services/groups.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,27 +15,27 @@ export default async function handler(
 
   switch (method) {
     case 'GET': // Get all groups
-      Group.find()
-        .collation({ locale: 'en', strength: 2 })
-        .sort({ name: 1 })
-        .then((groups) => res.json(groups))
-        .catch((err) => res.status(400).json('Error [Get All Groups]: ' + err))
+      try {
+        const groups = await getAllGroups()
+        res.json(groups)
+      } catch (err) {
+        res.status(400).json('Error [Get All Groups]: ' + err)
+      }
       break
 
     case 'POST': // Add new group
-      const newGroup = new Group({
-        name: req.body.name,
-        code: req.body.code,
-        description: req.body.description,
-        ownerId: req.body.ownerId,
-      })
-
-      newGroup
-        .save()
-        .then((group: GroupDocument) => res.json(group))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Add Group]: ' + err)
-        )
+      try {
+        const savedGroup = await handleGroupAdd({
+          name: req.body.name,
+          code: req.body.code,
+          description: req.body.description,
+          ownerId: req.body.ownerId,
+          driverIds: req.body.driverIds || [],
+        })
+        res.json(savedGroup)
+      } catch (err: any) {
+        res.status(400).json('Error [Add Group]: ' + err)
+      }
       break
 
     default:

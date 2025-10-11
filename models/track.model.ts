@@ -6,12 +6,9 @@ const trackSchema = new Schema(
   {
     groupId: {
       type: String,
+      required: true,
     },
     gameId: {
-      type: String,
-    },
-    // TODO: Remove once data / code migrated to use gameId
-    game: {
       type: String,
       required: true,
     },

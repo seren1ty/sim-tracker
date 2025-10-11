@@ -22,6 +22,8 @@ const Navbar = () => {
   const [games, setGames] = useState<Game[] | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  const prevGroupIdRef = React.useRef<string | null>(null)
+
   useEffect(() => {
     if (state?.driver) {
       initGroups(state?.driver?.groupIds)
@@ -42,7 +44,11 @@ const Navbar = () => {
 
   useEffect(() => {
     if (state?.group) {
-      initGames(state?.group._id)
+      const isGroupChange = !!(prevGroupIdRef.current && prevGroupIdRef.current !== state.group._id)
+      prevGroupIdRef.current = state.group._id
+
+      // Force game reset when switching to a different group
+      initGames(state?.group._id, isGroupChange)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state?.group])
@@ -85,7 +91,7 @@ const Navbar = () => {
       })
   }
 
-  const initGames = (groupId: string) => {
+  const initGames = (groupId: string, forceSetGame: boolean = false) => {
     if (!session || !session.user) {
       return
     }
@@ -97,9 +103,11 @@ const Navbar = () => {
 
         if (!res.data.length) {
           state?.setGame(null)
+          return
         }
 
-        if (!state?.game) {
+        // Always set game if forced (group change) or if no game is currently selected
+        if (forceSetGame || !state?.game) {
           state?.setGame(res.data[0])
         }
       })

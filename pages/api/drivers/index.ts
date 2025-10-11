@@ -1,8 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check';
 import dbConnect from '@/utils/db-connect';
-import Driver from '@/models/driver.model';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { DriverDocument } from '@/types';
+import { getAllDrivers, handleDriverAdd } from '@/services/drivers.service';
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,28 +15,26 @@ export default async function handler(
 
   switch (method) {
     case 'GET': // Get all drivers
-      Driver.find()
-        .collation({ locale: 'en', strength: 2 })
-        .sort({ name: 1 })
-        .then((drivers) => res.json(drivers))
-        .catch((err) =>
-          res.status(400).json('Error [Get All Drivers]: ' + err)
-        );
+      try {
+        const drivers = await getAllDrivers();
+        res.json(drivers);
+      } catch (err) {
+        res.status(400).json('Error [Get All Drivers]: ' + err);
+      }
       break;
 
     case 'POST':
-      const name = req.body.name;
-      const email = req.body.email;
-      const isAdmin = req.body.isAdmin;
-
-      const newDriver = new Driver({ name, email, isAdmin });
-
-      newDriver
-        .save()
-        .then((driver: DriverDocument) => res.json(driver))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Add Driver]: ' + err)
-        );
+      try {
+        const driver = await handleDriverAdd({
+          groupIds: req.body.groupIds,
+          name: req.body.name,
+          email: req.body.email,
+          isAdmin: req.body.isAdmin,
+        });
+        res.json(driver);
+      } catch (err) {
+        res.status(400).json('Error [Add Driver]: ' + err);
+      }
       break;
 
     default:

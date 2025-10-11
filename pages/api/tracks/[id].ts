@@ -1,7 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Track from '@/models/track.model'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getTrackById, handleTrackUpdate, handleTrackPatch, handleTrackDelete } from '@/services/tracks.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,42 +18,43 @@ export default async function handler(
 
   switch (method) {
     case 'GET' /* Get track by id */:
-      Track.findById(id)
-        .then((track) => res.json(track))
-        .catch((err) => res.status(400).json('Error [Get Track]: ' + err))
+      try {
+        const track = await getTrackById(id as string)
+        res.json(track)
+      } catch (err) {
+        res.status(400).json('Error [Get Track]: ' + err)
+      }
       break
 
     case 'PUT': // Edit track (full update)
-      Track.findByIdAndUpdate(id, {
-        groupId: req.body.groupId,
-        gameId: req.body.gameId,
-        game: req.body.game,
-        name: req.body.name,
-      })
-        .then((track) => res.json(track))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Edit Track]: ' + err)
-        )
+      try {
+        const track = await handleTrackUpdate(id as string, {
+          groupId: req.body.groupId,
+          gameId: req.body.gameId,
+          name: req.body.name,
+        })
+        res.json(track)
+      } catch (err) {
+        res.status(400).json('Error [Edit Track]: ' + err)
+      }
       break
 
     case 'PATCH': // Edit track (admin mode - name only)
-      // Only allow updating the name field from admin mode
-      // Protected fields: groupId, gameId, game
-      Track.findByIdAndUpdate(
-        id,
-        { name: req.body.name },
-        { new: true, runValidators: true }
-      )
-        .then((track) => res.json(track))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Patch Track]: ' + err)
-        )
+      try {
+        const track = await handleTrackPatch(id as string, { name: req.body.name })
+        res.json(track)
+      } catch (err) {
+        res.status(400).json('Error [Patch Track]: ' + err)
+      }
       break
 
     case 'DELETE': // Delete track
-      Track.findByIdAndDelete(id)
-        .then((track) => res.json(track))
-        .catch((err) => res.status(400).json('Error [Delete Track]: ' + err))
+      try {
+        const track = await handleTrackDelete(id as string)
+        res.json(track)
+      } catch (err) {
+        res.status(400).json('Error [Delete Track]: ' + err)
+      }
       break
 
     default:

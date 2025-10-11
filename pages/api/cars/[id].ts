@@ -1,7 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Car from '@/models/car.model'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getCarById, handleCarUpdate, handleCarPatch, handleCarDelete } from '@/services/cars.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,40 +18,43 @@ export default async function handler(
 
   switch (method) {
     case 'GET' /* Get car by id */:
-      Car.findById(id)
-        .then((car) => res.json(car))
-        .catch((err) => res.status(400).json('Error [Get Car]: ' + err))
+      try {
+        const car = await getCarById(id as string)
+        res.json(car)
+      } catch (err) {
+        res.status(400).json('Error [Get Car]: ' + err)
+      }
       break
 
     case 'PUT': // Edit car (full update)
-      Car.findByIdAndUpdate(id, {
-        groupId: req.body.groupId,
-        gameId: req.body.gameId,
-        game: req.body.game,
-        name: req.body.name,
-      })
-        .then((car) => res.json(car))
-        .catch((err: Error) => res.status(400).json('Error [Edit Car]: ' + err))
+      try {
+        const car = await handleCarUpdate(id as string, {
+          groupId: req.body.groupId,
+          gameId: req.body.gameId,
+          name: req.body.name,
+        })
+        res.json(car)
+      } catch (err) {
+        res.status(400).json('Error [Edit Car]: ' + err)
+      }
       break
 
     case 'PATCH': // Edit car (admin mode - name only)
-      // Only allow updating the name field from admin mode
-      // Protected fields: groupId, gameId, game
-      Car.findByIdAndUpdate(
-        id,
-        { name: req.body.name },
-        { new: true, runValidators: true }
-      )
-        .then((car) => res.json(car))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Patch Car]: ' + err)
-        )
+      try {
+        const car = await handleCarPatch(id as string, { name: req.body.name })
+        res.json(car)
+      } catch (err) {
+        res.status(400).json('Error [Patch Car]: ' + err)
+      }
       break
 
     case 'DELETE': // Delete car
-      Car.findByIdAndDelete(id)
-        .then((car) => res.json(car))
-        .catch((err) => res.status(400).json('Error [Delete Car]: ' + err))
+      try {
+        const car = await handleCarDelete(id as string)
+        res.json(car)
+      } catch (err) {
+        res.status(400).json('Error [Delete Car]: ' + err)
+      }
       break
 
     default:

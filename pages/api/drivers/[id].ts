@@ -1,8 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check';
 import dbConnect from '@/utils/db-connect';
-import Driver from '@/models/driver.model';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { DriverDocument } from '@/types';
+import { getDriverById, handleDriverUpdate, handleDriverPatch, handleDriverDelete } from '@/services/drivers.service';
 
 export default async function handler(
   req: NextApiRequest,
@@ -19,41 +18,43 @@ export default async function handler(
 
   switch (method) {
     case 'GET': // Get driver by id
-      Driver.findById(id)
-        .then((driver) => res.json(driver))
-        .catch((err) => res.status(400).json('Error [Get Driver]: ' + err));
+      try {
+        const driver = await getDriverById(id as string);
+        res.json(driver);
+      } catch (err) {
+        res.status(400).json('Error [Get Driver]: ' + err);
+      }
       break;
 
     case 'PUT': // Edit driver (full update)
-      Driver.findByIdAndUpdate(id, { name: req.body.name })
-        .then((driver) => res.json(driver))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Edit Driver]: ' + err)
-        );
+      try {
+        const driver = await handleDriverUpdate(id as string, { name: req.body.name });
+        res.json(driver);
+      } catch (err) {
+        res.status(400).json('Error [Edit Driver]: ' + err);
+      }
       break;
 
     case 'PATCH': // Edit driver (admin mode - name, email, isAdmin)
-      // Only allow updating specific fields from admin mode
-      // Protected fields: groupIds
-      const updateData: any = {};
-      if (req.body.name !== undefined) updateData.name = req.body.name;
-      if (req.body.email !== undefined) updateData.email = req.body.email;
-      if (req.body.isAdmin !== undefined) updateData.isAdmin = req.body.isAdmin;
-
-      Driver.findByIdAndUpdate(id, updateData, {
-        new: true,
-        runValidators: true,
-      })
-        .then((driver) => res.json(driver))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Patch Driver]: ' + err)
-        );
+      try {
+        const driver = await handleDriverPatch(id as string, {
+          name: req.body.name,
+          email: req.body.email,
+          isAdmin: req.body.isAdmin,
+        });
+        res.json(driver);
+      } catch (err) {
+        res.status(400).json('Error [Patch Driver]: ' + err);
+      }
       break;
 
     case 'DELETE': // Delete driver
-      Driver.findByIdAndDelete(id)
-        .then((driver) => res.json(driver))
-        .catch((err) => res.status(400).json('Error [Delete Driver]: ' + err));
+      try {
+        const driver = await handleDriverDelete(id as string);
+        res.json(driver);
+      } catch (err) {
+        res.status(400).json('Error [Delete Driver]: ' + err);
+      }
       break;
 
     default:

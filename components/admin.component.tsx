@@ -169,9 +169,9 @@ const Admin = () => {
 
   const handleAdd = async (newName: string) => {
     if (dataType === 'Tracks') {
-      // TODO Pass groupId/gameId to create
       const result = await performAdd('track', {
-        game: state?.game,
+        groupId: state?.group?._id,
+        gameId: state?.game?._id,
         name: newName,
       })
 
@@ -181,9 +181,8 @@ const Admin = () => {
         ...tracks,
         {
           _id: result._id,
-          groupId: state?.group?._id || '',
-          gameId: state?.game?._id || '',
-          game: result.game,
+          groupId: result.groupId,
+          gameId: result.gameId,
           name: result.name,
         },
       ]
@@ -194,9 +193,9 @@ const Admin = () => {
 
       setTracks(newTracks)
     } else if (dataType === 'Cars') {
-      // TODO Pass groupId/gameId to create
       const result = await performAdd('car', {
-        game: state?.game,
+        groupId: state?.group?._id,
+        gameId: state?.game?._id,
         name: newName,
       })
 
@@ -206,9 +205,8 @@ const Admin = () => {
         ...cars,
         {
           _id: result._id,
-          groupId: state?.group?._id || '',
-          gameId: state?.game?._id || '',
-          game: result.game,
+          groupId: result.groupId,
+          gameId: result.gameId,
           name: result.name,
         },
       ]
@@ -220,8 +218,11 @@ const Admin = () => {
       setCars(newCars)
     } else if (dataType === 'Games') {
       const newCode = determineGameCode(newName)
-      // TODO Pass groupId/gameId to create
-      const result = await performAdd('game', { name: newName, code: newCode })
+      const result = await performAdd('game', {
+        groupId: state?.group?._id,
+        name: newName,
+        code: newCode,
+      })
 
       if (!result) return
 
@@ -229,7 +230,7 @@ const Admin = () => {
         ...games,
         {
           _id: result._id,
-          groupId: state?.group?._id || '',
+          groupId: result.groupId,
           name: result.name,
           code: result.code,
         },
@@ -243,14 +244,13 @@ const Admin = () => {
     }
   }
 
-  // TODO Pass groupId/gameId to create
   const handleAddDriver = async (newDriver: NewDriver) => {
-    console.log(newDriver)
-
     if (dataType === 'Drivers') {
       const result = await performAdd('driver', {
+        groupIds: [state?.group?._id],
         name: newDriver.name,
         email: newDriver.email,
+        isAdmin: newDriver.isAdmin || false,
       })
 
       if (!result) return
@@ -259,9 +259,10 @@ const Admin = () => {
         ...drivers,
         {
           _id: result._id,
-          groupIds: state?.group?._id ? [state.group._id] : [],
+          groupIds: result.groupIds,
           name: result.name,
-          isAdmin: false,
+          email: result.email,
+          isAdmin: result.isAdmin,
         },
       ]
 
@@ -273,16 +274,14 @@ const Admin = () => {
     }
   }
 
-  // TODO Pass groupId/gameId to create
   const handleAddGroup = async (newGroup: NewGroup) => {
-    console.log(newGroup)
-
     if (dataType === 'Groups') {
       const result = await performAdd('group', {
         name: newGroup.name,
         code: newGroup.code,
         description: newGroup.description,
-        ownerId: newGroup.ownerId,
+        ownerId: state?.driver?._id,
+        driverIds: [state?.driver?._id],
       })
 
       if (!result) return
@@ -295,7 +294,7 @@ const Admin = () => {
           code: result.code,
           description: result.description,
           ownerId: result.ownerId,
-          driverIds: [],
+          driverIds: result.driverIds || [],
         },
       ]
 

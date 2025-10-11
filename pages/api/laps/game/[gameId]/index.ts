@@ -1,7 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Lap from '@/models/lap.model'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getLapsByGame } from '@/services/laps.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,13 +18,12 @@ export default async function handler(
 
   switch (method) {
     case 'GET' /* Get all laps for a specific game */:
-      Lap.find({ gameId })
-        .collation({ locale: 'en', strength: 2 })
-        .sort({ name: 1 })
-        .then((laps) => res.json(laps))
-        .catch((err) =>
-          res.status(400).json('Error [Get All Laps For Game]: ' + err)
-        )
+      try {
+        const laps = await getLapsByGame(gameId as string)
+        res.json(laps)
+      } catch (err) {
+        res.status(400).json('Error [Get All Laps For Game]: ' + err)
+      }
       break
 
     default:

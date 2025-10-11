@@ -1142,6 +1142,8 @@ body {
       &.add {
         display: block;
         border-style: dotted;
+        max-height: none; // Remove max-height constraint for add mode
+        min-height: 50px; // Default min-height for simple add forms (tracks, cars, games)
 
         &.driver {
           min-height: 76px;
