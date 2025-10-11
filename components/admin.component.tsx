@@ -133,7 +133,7 @@ const Admin = () => {
     state.setLoading(true)
 
     axios
-      .get('/api/groups')
+      .get('/api/groups/game-check')
       .then((res) => {
         setGroups(res.data)
       })

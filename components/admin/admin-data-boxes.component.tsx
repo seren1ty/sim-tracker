@@ -5,6 +5,7 @@ type AdminBoxData = {
   _id: string;
   name: string;
   hasLaps?: boolean;
+  hasGames?: boolean;
 };
 
 type AdminDataProps = {
@@ -138,7 +139,7 @@ const AdminDataBoxes = (props: AdminDataProps) => {
             <div
               className={
                 'data-box' +
-                (!dataItem.hasLaps ? ' no-laps' : '') +
+                (!dataItem.hasLaps && !dataItem.hasGames ? ' no-laps' : '') +
                 (isEditingThisItem ? ' editing' : '')
               }
               id={'DataBox_' + dataItem._id}
@@ -184,7 +185,7 @@ const AdminDataBoxes = (props: AdminDataProps) => {
                       {!showConfirm && (
                         <div>
                           <div className="data-box-edit" onClick={() => onClickEdit(dataItem)}>Edit</div>
-                          {!dataItem.hasLaps && (
+                          {!dataItem.hasLaps && !dataItem.hasGames && (
                             <div
                               className="data-box-delete"
                               onClick={onClickDelete}
