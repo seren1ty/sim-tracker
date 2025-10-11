@@ -307,11 +307,10 @@ const AddEditLap: React.FC = () => {
       )
     }
 
-    // TODO Switch back to reading group values once groups enabled.
     return {
       _id: existingLap ? existingLap._id : '',
-      groupId: '604d68c1fd8e9726c8f8dd8f', //!existingLap ? state?.group?._id : existingLap.groupId,
-      group: 'DriftJockeys', //!existingLap ? state?.group?.name : existingLap.group,
+      groupId: !existingLap ? state?.group?._id : existingLap.groupId,
+      group: !existingLap ? state?.group?.name : existingLap.group,
       gameId: !existingLap ? state?.game?._id : existingLap.gameId,
       game: !existingLap ? state?.game?.name : existingLap.game,
       trackId: currTrack._id,
@@ -330,12 +329,11 @@ const AddEditLap: React.FC = () => {
     }
   }
 
-  // TODO Switch back to reading group values once groups enabled.
   const handleAddNewTrack = () => {
     return (
       axios
         .post('/api/tracks', {
-          groupId: '604d68c1fd8e9726c8f8dd8f', //!existingLap ? state?.group?._id : existingLap.groupId,
+          groupId: !existingLap ? state?.group?._id : existingLap.groupId,
           gameId: state?.game?._id,
           game: state?.game?.name,
           name: newTrackName,
@@ -356,12 +354,11 @@ const AddEditLap: React.FC = () => {
     )
   }
 
-  // TODO Switch back to reading group values once groups enabled.
   const handleAddNewCar = () => {
     return (
       axios
         .post('/api/cars', {
-          groupId: '604d68c1fd8e9726c8f8dd8f', //!existingLap ? state?.group?._id : existingLap.groupId,
+          groupId: !existingLap ? state?.group?._id : existingLap.groupId,
           gameId: state?.game?._id,
           game: state?.game?.name,
           name: newCarName,
@@ -476,10 +473,6 @@ const AddEditLap: React.FC = () => {
     )
   }
 
-  if (loading) {
-    return <SkeletonAddEditLap />
-  }
-
   return (
     <>
       <div className="ae-page">
@@ -488,300 +481,304 @@ const AddEditLap: React.FC = () => {
         ) : (
           <h4 className="lap-title">Add Lap</h4>
         )}
-        <div className="ae-container">
-          <div className="ae-form-container">
-            <form onSubmit={onSubmit}>
-              <div className="row mt-4">
-                <div className={`col ${state?.showMobile ? 'pr-1' : 'pr-4'}`}>
-                  <div className="form-group">
-                    <label className="add-edit-label-with-button">Track</label>
-                    {!addTrackInProgress ? (
-                      <button
-                        className="btn btn-sm btn-secondary add-track-car"
-                        type="button"
-                        onClick={onClickAddTrack}
-                        disabled={addTrackInProgress}
-                      >
-                        Add Track
-                      </button>
-                    ) : (
-                      <button
-                        className="add-track-car pr-0 btn btn-link"
-                        onClick={onClickCancelAddTrack}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                    {!addTrackInProgress ? (
-                      <select
-                        className="form-control"
-                        required
-                        value={trackId}
-                        onChange={onChangeTrack}
-                      >
-                        {tracks.map((currTrack) => {
-                          return (
-                            <option key={currTrack._id} value={currTrack._id}>
-                              {currTrack.name}
-                            </option>
-                          )
-                        })}
-                      </select>
-                    ) : (
-                      <input
-                        className="form-control"
-                        type="text"
-                        required
-                        value={newTrackName}
-                        onChange={onChangeNewTrackName}
-                        placeholder="Enter New Track Name"
-                      />
-                    )}
-                  </div>
-                </div>
-                <div className="col">
-                  <div className="form-group">
-                    <label className="add-edit-label-with-button">Car</label>
-                    {!addCarInProgress ? (
-                      <button
-                        className="btn btn-sm btn-secondary add-track-car"
-                        type="button"
-                        onClick={onClickAddCar}
-                        disabled={addCarInProgress}
-                      >
-                        Add Car
-                      </button>
-                    ) : (
-                      <button
-                        className="add-track-car pr-0 btn btn-link"
-                        onClick={onClickCancelAddCar}
-                      >
-                        Cancel
-                      </button>
-                    )}
-                    {!addCarInProgress ? (
-                      <select
-                        className="form-control"
-                        required
-                        value={carId}
-                        onChange={onChangeCar}
-                      >
-                        {cars.map((currCar) => {
-                          return (
-                            <option key={currCar._id} value={currCar._id}>
-                              {currCar.name}
-                            </option>
-                          )
-                        })}
-                      </select>
-                    ) : (
-                      <input
-                        className="form-control"
-                        type="text"
-                        required
-                        value={newCarName}
-                        onChange={onChangeNewCarName}
-                        placeholder="Enter New Car Name"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="row mt-0">
-                <div className={`col ${state?.showMobile ? 'pr-0' : 'pr-4'}`}>
-                  <div className="form-group">
-                    <label className="add-edit-label">Laptime</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      required
-                      minLength={9}
-                      maxLength={9}
-                      pattern="\d{2}:\d{2}\.\d{3}"
-                      value={laptime}
-                      onChange={onChangeLaptime}
-                      placeholder="00:00.000"
-                    />
-                    <small className="text-muted laptime-format">
-                      {laptime && laptime.length > 0 && laptime.length < 9 ? (
-                        <span>Format: 00:00.000</span>
+        {loading ? (
+          <SkeletonAddEditLap />
+        ) : (
+          <div className="ae-container">
+            <div className="ae-form-container">
+              <form onSubmit={onSubmit}>
+                <div className="row mt-4">
+                  <div className={`col ${state?.showMobile ? 'pr-1' : 'pr-4'}`}>
+                    <div className="form-group">
+                      <label className="add-edit-label-with-button">Track</label>
+                      {!addTrackInProgress ? (
+                        <button
+                          className="btn btn-sm btn-secondary add-track-car"
+                          type="button"
+                          onClick={onClickAddTrack}
+                          disabled={addTrackInProgress}
+                        >
+                          Add Track
+                        </button>
                       ) : (
-                        <span>&nbsp;</span>
+                        <button
+                          className="add-track-car pr-0 btn btn-link"
+                          onClick={onClickCancelAddTrack}
+                        >
+                          Cancel
+                        </button>
                       )}
-                    </small>
+                      {!addTrackInProgress ? (
+                        <select
+                          className="form-control"
+                          required
+                          value={trackId}
+                          onChange={onChangeTrack}
+                        >
+                          {tracks.map((currTrack) => {
+                            return (
+                              <option key={currTrack._id} value={currTrack._id}>
+                                {currTrack.name}
+                              </option>
+                            )
+                          })}
+                        </select>
+                      ) : (
+                        <input
+                          className="form-control"
+                          type="text"
+                          required
+                          value={newTrackName}
+                          onChange={onChangeNewTrackName}
+                          placeholder="Enter New Track Name"
+                        />
+                      )}
+                    </div>
+                  </div>
+                  <div className="col">
+                    <div className="form-group">
+                      <label className="add-edit-label-with-button">Car</label>
+                      {!addCarInProgress ? (
+                        <button
+                          className="btn btn-sm btn-secondary add-track-car"
+                          type="button"
+                          onClick={onClickAddCar}
+                          disabled={addCarInProgress}
+                        >
+                          Add Car
+                        </button>
+                      ) : (
+                        <button
+                          className="add-track-car pr-0 btn btn-link"
+                          onClick={onClickCancelAddCar}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      {!addCarInProgress ? (
+                        <select
+                          className="form-control"
+                          required
+                          value={carId}
+                          onChange={onChangeCar}
+                        >
+                          {cars.map((currCar) => {
+                            return (
+                              <option key={currCar._id} value={currCar._id}>
+                                {currCar.name}
+                              </option>
+                            )
+                          })}
+                        </select>
+                      ) : (
+                        <input
+                          className="form-control"
+                          type="text"
+                          required
+                          value={newCarName}
+                          onChange={onChangeNewCarName}
+                          placeholder="Enter New Car Name"
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="col">
-                  <div className="form-group">
-                    <label className="add-edit-label">Driver</label>
-                    <input
-                      className="form-control driver-input"
-                      required
-                      value={driverName}
-                      disabled={true}
-                    />
+                <div className="row mt-0">
+                  <div className={`col ${state?.showMobile ? 'pr-0' : 'pr-4'}`}>
+                    <div className="form-group">
+                      <label className="add-edit-label">Laptime</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        required
+                        minLength={9}
+                        maxLength={9}
+                        pattern="\d{2}:\d{2}\.\d{3}"
+                        value={laptime}
+                        onChange={onChangeLaptime}
+                        placeholder="00:00.000"
+                      />
+                      <small className="text-muted laptime-format">
+                        {laptime && laptime.length > 0 && laptime.length < 9 ? (
+                          <span>Format: 00:00.000</span>
+                        ) : (
+                          <span>&nbsp;</span>
+                        )}
+                      </small>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="row mt-0">
-                <div className={`col ${state?.showMobile ? 'mr-1 pr-0' : 'mr-3 pr-2'}`}>
-                  <div className="form-group">
-                    <label className="add-edit-label">Gearbox</label>
-                    <select
-                      className="form-control"
-                      required
-                      value={gearbox}
-                      onChange={onChangeGearbox}
-                    >
-                      <option value="Automatic">Automatic</option>
-                      <option value="Manual">Manual</option>
-                    </select>
-                  </div>
-                </div>
-                <div className={`col ${state?.showMobile ? 'mr-1 pr-0' : 'mr-3 pr-2'}`}>
-                  <div className="form-group">
-                    <label className="add-edit-label">Traction</label>
-                    <select
-                      className="form-control"
-                      required
-                      value={traction}
-                      onChange={onChangeTraction}
-                    >
-                      <option value="Factory">Factory</option>
-                      <option value="On">On</option>
-                      <option value="Off">Off</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="col">
-                  <div className="form-group">
-                    <label className="add-edit-label">Stability</label>
-                    <select
-                      className="form-control"
-                      required
-                      value={stability}
-                      onChange={onChangeStability}
-                    >
-                      <option value="Factory">Factory</option>
-                      <option value="On">On</option>
-                      <option value="Off">Off</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-              <div className="row mt-0 mr-0">
-                <div className="col-4 add-edit-date">
-                  <div className="form-group">
-                    <label className="add-edit-label">Date</label>
-                    <div>
-                      <DatePicker
-                        selected={date}
-                        onChange={onChangeDate}
-                        dateFormat="dd/MM/yy"
+                  <div className="col">
+                    <div className="form-group">
+                      <label className="add-edit-label">Driver</label>
+                      <input
+                        className="form-control driver-input"
+                        required
+                        value={driverName}
+                        disabled={true}
                       />
                     </div>
                   </div>
                 </div>
-                <div className={`col-8 ${state?.showMobile ? 'pl-0' : 'pl-4'} pr-0`}>
-                  <div className="form-group">
-                    <label className="add-edit-label">Replay</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={replay}
-                      onChange={onChangeReplay}
-                      placeholder="Enter URL of uploaded lap replay - Eg. Youtube"
-                    />
+                <div className="row mt-0">
+                  <div className={`col ${state?.showMobile ? 'mr-1 pr-0' : 'mr-3 pr-2'}`}>
+                    <div className="form-group">
+                      <label className="add-edit-label">Gearbox</label>
+                      <select
+                        className="form-control"
+                        required
+                        value={gearbox}
+                        onChange={onChangeGearbox}
+                      >
+                        <option value="Automatic">Automatic</option>
+                        <option value="Manual">Manual</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className={`col ${state?.showMobile ? 'mr-1 pr-0' : 'mr-3 pr-2'}`}>
+                    <div className="form-group">
+                      <label className="add-edit-label">Traction</label>
+                      <select
+                        className="form-control"
+                        required
+                        value={traction}
+                        onChange={onChangeTraction}
+                      >
+                        <option value="Factory">Factory</option>
+                        <option value="On">On</option>
+                        <option value="Off">Off</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="col">
+                    <div className="form-group">
+                      <label className="add-edit-label">Stability</label>
+                      <select
+                        className="form-control"
+                        required
+                        value={stability}
+                        onChange={onChangeStability}
+                      >
+                        <option value="Factory">Factory</option>
+                        <option value="On">On</option>
+                        <option value="Off">Off</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="row mt-0 mr-0">
-                <div className="col-12 pr-0">
-                  <div className="form-group">
-                    <label className="add-edit-label">Notes</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      value={notes}
-                      onChange={onChangeNotes}
-                    />
+                <div className="row mt-0 mr-0">
+                  <div className="col-4 add-edit-date">
+                    <div className="form-group">
+                      <label className="add-edit-label">Date</label>
+                      <div>
+                        <DatePicker
+                          selected={date}
+                          onChange={onChangeDate}
+                          dateFormat="dd/MM/yy"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`col-8 ${state?.showMobile ? 'pl-0' : 'pl-4'} pr-0`}>
+                    <div className="form-group">
+                      <label className="add-edit-label">Replay</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        value={replay}
+                        onChange={onChangeReplay}
+                        placeholder="Enter URL of uploaded lap replay - Eg. Youtube"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="form-group mt-2 add-edit-button">
-                <input
-                  className="btn btn-primary mr-4"
-                  type="submit"
-                  disabled={submitClicked}
-                  value={existingLap ? 'Update Lap' : 'Add New Lap'}
-                />
-                <Link href="/">Cancel</Link>
-              </div>
-            </form>
-          </div>
-          <div
-            className={
-              'ae-feedback-container' +
-              (displayExtraFeedback() ? ' extraFeedbackIncluded' : '')
-            }
-          >
-            <div className="feedback-banner">
-              <h1 className="title-line-1">Hit the Track.</h1>
-              <h1 className="title-line-2">Make History</h1>
+                <div className="row mt-0 mr-0">
+                  <div className="col-12 pr-0">
+                    <div className="form-group">
+                      <label className="add-edit-label">Notes</label>
+                      <input
+                        className="form-control"
+                        type="text"
+                        value={notes}
+                        onChange={onChangeNotes}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="form-group mt-2 add-edit-button">
+                  <input
+                    className="btn btn-primary mr-4"
+                    type="submit"
+                    disabled={submitClicked}
+                    value={existingLap ? 'Update Lap' : 'Add New Lap'}
+                  />
+                  <Link href="/">Cancel</Link>
+                </div>
+              </form>
             </div>
-            <div className="feedback-extra">
-              {laptime.length === 9 &&
-                laps.length > 0 &&
-                (checkLapRecord() ||
-                  checkLapRecordForCar() ||
-                  checkPersonalLapRecordForCar()) && (
+            <div
+              className={
+                'ae-feedback-container' +
+                (displayExtraFeedback() ? ' extraFeedbackIncluded' : '')
+              }
+            >
+              <div className="feedback-banner">
+                <h1 className="title-line-1">Hit the Track.</h1>
+                <h1 className="title-line-2">Make History</h1>
+              </div>
+              <div className="feedback-extra">
+                {laptime.length === 9 &&
+                  laps.length > 0 &&
+                  (checkLapRecord() ||
+                    checkLapRecordForCar() ||
+                    checkPersonalLapRecordForCar()) && (
+                    <div>
+                      {checkLapRecord() && (
+                        <>
+                          <span className="lap-record">Track record</span>
+                          <span> across all cars</span>
+                        </>
+                      )}
+                      {checkLapRecordForCar() && (
+                        <>
+                          <span className="lap-record-for-car">Track record</span>
+                          <span> for the {carName}</span>
+                        </>
+                      )}
+                      {checkPersonalLapRecordForCar() && (
+                        <>
+                          <span className="personal-lap-record-for-car">
+                            Personal best
+                          </span>
+                          <span>
+                            {' '}
+                            lap for {driverName} in the {carName}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                {laptime.length === 9 && laps.length > 0 && splitToFasterLap && (
                   <div>
-                    {checkLapRecord() && (
-                      <>
-                        <span className="lap-record">Track record</span>
-                        <span> across all cars</span>
-                      </>
-                    )}
-                    {checkLapRecordForCar() && (
-                      <>
-                        <span className="lap-record-for-car">Track record</span>
-                        <span> for the {carName}</span>
-                      </>
-                    )}
-                    {checkPersonalLapRecordForCar() && (
-                      <>
-                        <span className="personal-lap-record-for-car">
-                          Personal best
-                        </span>
-                        <span>
-                          {' '}
-                          lap for {driverName} in the {carName}
-                        </span>
-                      </>
-                    )}
+                    <span>Keep it up! Only </span>
+                    <span>
+                      <strong>{splitToFasterLap}</strong>
+                    </span>
+                    <span> to reach the best lap</span>
                   </div>
                 )}
-              {laptime.length === 9 && laps.length > 0 && splitToFasterLap && (
-                <div>
-                  <span>Keep it up! Only </span>
-                  <span>
-                    <strong>{splitToFasterLap}</strong>
-                  </span>
-                  <span> to reach the best lap</span>
-                </div>
-              )}
-              {laptime.length === 9 && laps.length > 0 && splitToSlowerLap && (
-                <div>
-                  <span>Congratulations! </span>
-                  <span>
-                    <strong>{splitToSlowerLap}</strong>
-                  </span>
-                  <span> ahead of the next best lap</span>
-                </div>
-              )}
+                {laptime.length === 9 && laps.length > 0 && splitToSlowerLap && (
+                  <div>
+                    <span>Congratulations! </span>
+                    <span>
+                      <strong>{splitToSlowerLap}</strong>
+                    </span>
+                    <span> ahead of the next best lap</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   )
