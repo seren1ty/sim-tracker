@@ -15,6 +15,7 @@ import {
 import { Car, Game, Lap, Track } from '@/types'
 import { getGameState, setGameState } from '@/utils/ac-localStorage'
 import Link from 'next/link'
+import SkeletonAddEditLap from './skeleton/skeleton-add-edit-lap.component'
 
 const AddEditLap: React.FC = () => {
   const state = useContext(StateContext)
@@ -476,7 +477,7 @@ const AddEditLap: React.FC = () => {
   }
 
   if (loading) {
-    return <></>
+    return <SkeletonAddEditLap />
   }
 
   return (

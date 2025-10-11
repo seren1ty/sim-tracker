@@ -180,6 +180,11 @@ body {
         flex-basis: 40%;
       }
     }
+
+    .skeleton-ae-row {
+      flex-direction: column;
+      gap: 15px;
+    }
   }
 
   /* Medium devices (tablets, 768px and up) The navbar toggle appears at this breakpoint */
@@ -641,6 +646,71 @@ body {
   .long {
     flex-basis: 30%;
   }
+}
+
+.skeleton-ae-title {
+  width: 150px;
+  height: 30px;
+  background: lightgray;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  margin-left: 5px;
+}
+
+.skeleton-ae-form {
+  width: 100%;
+  max-width: 650px;
+}
+
+.skeleton-ae-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.skeleton-ae-field,
+.skeleton-ae-field-small,
+.skeleton-ae-field-date,
+.skeleton-ae-field-replay,
+.skeleton-ae-field-full {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.skeleton-ae-field-small {
+  flex: 0.5;
+}
+
+.skeleton-ae-field-date {
+  flex: 0.4;
+}
+
+.skeleton-ae-field-replay {
+  flex: 1.6;
+}
+
+.skeleton-ae-label {
+  width: 80px;
+  height: 20px;
+  background: lightgray;
+  border-radius: 5px;
+}
+
+.skeleton-ae-input {
+  width: 100%;
+  height: 38px;
+  background: lightgray;
+  border-radius: 5px;
+}
+
+.skeleton-ae-button {
+  width: 120px;
+  height: 38px;
+  background: lightgray;
+  border-radius: 5px;
+  margin-top: 10px;
 }
 
 // Common
