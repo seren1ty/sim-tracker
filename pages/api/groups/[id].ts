@@ -1,7 +1,12 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Group from '@/models/group.model'
 import { NextApiRequest, NextApiResponse } from 'next'
+import {
+  getGroupById,
+  getGroupsByIds,
+  handleGroupUpdate,
+  handleGroupDelete,
+} from '@/services/groups.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,53 +25,58 @@ export default async function handler(
 
   switch (method) {
     case 'GET':
-      if (queryId?.includes(',')) {
-        Group.find({ _id: { $in: queryId.split(',') } }) // Get groups by ids
-          .then((groups) => res.json(groups))
-          .catch((err) => res.status(400).json('Error [Get Groups]: ' + err))
-      } else {
-        Group.findById(queryId) // Get group by id
-          .then((group) => res.json(group))
-          .catch((err) => res.status(400).json('Error [Get Group]: ' + err))
+      try {
+        if (queryId?.includes(',')) {
+          // Get groups by ids
+          const groups = await getGroupsByIds(queryId.split(','))
+          res.json(groups)
+        } else {
+          // Get group by id
+          const group = await getGroupById(queryId)
+          res.json(group)
+        }
+      } catch (err) {
+        res.status(400).json('Error [Get Group(s)]: ' + err)
       }
       break
 
     case 'PUT': // Edit group (full update)
-      Group.findByIdAndUpdate(queryId, {
-        name: req.body.name,
-        code: req.body.code,
-        description: req.body.description,
-        ownerId: req.body.ownerId,
-      })
-        .then((group) => res.json(group))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Edit Group]: ' + err)
-        )
+      try {
+        const group = await handleGroupUpdate(queryId, {
+          name: req.body.name,
+          code: req.body.code,
+          description: req.body.description,
+        })
+        res.json(group)
+      } catch (err: any) {
+        res.status(400).json('Error [Edit Group]: ' + err)
+      }
       break
 
     case 'PATCH': // Edit group (admin mode - name, code, description only)
-      // Only allow updating specific fields from admin mode
-      // Protected fields: ownerId, driverIds
-      const updateData: any = {}
-      if (req.body.name !== undefined) updateData.name = req.body.name
-      if (req.body.code !== undefined) updateData.code = req.body.code
-      if (req.body.description !== undefined)
-        updateData.description = req.body.description
+      try {
+        // Only allow updating specific fields from admin mode
+        // Protected fields: ownerId, driverIds
+        const updateData: any = {}
+        if (req.body.name !== undefined) updateData.name = req.body.name
+        if (req.body.code !== undefined) updateData.code = req.body.code
+        if (req.body.description !== undefined)
+          updateData.description = req.body.description
 
-      Group.findByIdAndUpdate(queryId, updateData, {
-        new: true,
-        runValidators: true,
-      })
-        .then((group) => res.json(group))
-        .catch((err: Error) =>
-          res.status(400).json('Error [Patch Group]: ' + err)
-        )
+        const group = await handleGroupUpdate(queryId, updateData)
+        res.json(group)
+      } catch (err: any) {
+        res.status(400).json('Error [Patch Group]: ' + err)
+      }
       break
 
     case 'DELETE': // Delete group
-      Group.findByIdAndDelete(queryId)
-        .then((group) => res.json(group))
-        .catch((err) => res.status(400).json('Error [Delete Group]: ' + err))
+      try {
+        const group = await handleGroupDelete(queryId)
+        res.json(group)
+      } catch (err) {
+        res.status(400).json('Error [Delete Group]: ' + err)
+      }
       break
 
     default:

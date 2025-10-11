@@ -1,7 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Lap from '@/models/lap.model'
 import { NextApiRequest, NextApiResponse } from 'next'
+import { getLapById, handleLapUpdate, handleLapDelete } from '@/services/laps.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,41 +18,48 @@ export default async function handler(
 
   switch (method) {
     case 'GET' /* Get lap by id */:
-      Lap.findById(id)
-        .then((lap) => res.json(lap))
-        .catch((err) => res.status(400).json('Error [Get Lap]: ' + err))
+      try {
+        const lap = await getLapById(id as string)
+        res.json(lap)
+      } catch (err) {
+        res.status(400).json('Error [Get Lap]: ' + err)
+      }
       break
 
     case 'PUT': // Edit lap
-      const newLap = {
-        groupId: req.body.groupId,
-        group: req.body.group,
-        gameId: req.body.gameId,
-        game: req.body.game,
-        trackId: req.body.trackId,
-        track: req.body.track,
-        carId: req.body.carId,
-        car: req.body.car,
-        driverId: req.body.driverId,
-        driver: req.body.driver,
-        laptime: req.body.laptime,
-        gearbox: req.body.gearbox,
-        traction: req.body.traction,
-        stability: req.body.stability,
-        replay: req.body.replay,
-        notes: req.body.notes,
-        date: Date.parse(req.body.date),
+      try {
+        const lap = await handleLapUpdate(id as string, {
+          groupId: req.body.groupId,
+          group: req.body.group,
+          gameId: req.body.gameId,
+          game: req.body.game,
+          trackId: req.body.trackId,
+          track: req.body.track,
+          carId: req.body.carId,
+          car: req.body.car,
+          driverId: req.body.driverId,
+          driver: req.body.driver,
+          laptime: req.body.laptime,
+          gearbox: req.body.gearbox,
+          traction: req.body.traction,
+          stability: req.body.stability,
+          replay: req.body.replay,
+          notes: req.body.notes,
+          date: req.body.date,
+        })
+        res.json(lap)
+      } catch (err) {
+        res.status(400).json('Error [Edit Lap]: ' + err)
       }
-
-      Lap.findByIdAndUpdate(id, newLap)
-        .then((lap) => res.json(lap))
-        .catch((err: Error) => res.status(400).json('Error [Edit Lap]: ' + err))
       break
 
     case 'DELETE': // Delete lap
-      Lap.findByIdAndDelete(id)
-        .then((lap) => res.json(lap))
-        .catch((err) => res.status(400).json('Error [Delete Lap]: ' + err))
+      try {
+        const lap = await handleLapDelete(id as string)
+        res.json(lap)
+      } catch (err) {
+        res.status(400).json('Error [Delete Lap]: ' + err)
+      }
       break
 
     default:

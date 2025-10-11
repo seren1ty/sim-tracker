@@ -1,8 +1,7 @@
 import serverAuthCheck from '@/utils/server-auth-check'
 import dbConnect from '@/utils/db-connect'
-import Car from '@/models/car.model'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { CarDocument } from '@/types'
+import { getAllCars, handleCarAdd } from '@/services/cars.service'
 
 export default async function handler(
   req: NextApiRequest,
@@ -16,25 +15,25 @@ export default async function handler(
 
   switch (method) {
     case 'GET': // Get all drivers
-      Car.find()
-        .collation({ locale: 'en', strength: 2 })
-        .sort({ name: 1 })
-        .then((cars) => res.json(cars))
-        .catch((err) => res.status(400).json('Error [Get All Cars]: ' + err))
+      try {
+        const cars = await getAllCars()
+        res.json(cars)
+      } catch (err) {
+        res.status(400).json('Error [Get All Cars]: ' + err)
+      }
       break
 
     case 'POST': // Add new car
-      const newCar = new Car({
-        groupId: req.body.groupId,
-        gameId: req.body.gameId,
-        game: req.body.game,
-        name: req.body.name,
-      })
-
-      newCar
-        .save()
-        .then((car: CarDocument) => res.json(car))
-        .catch((err: Error) => res.status(400).json('Error [Add Car]: ' + err))
+      try {
+        const car = await handleCarAdd({
+          groupId: req.body.groupId,
+          gameId: req.body.gameId,
+          name: req.body.name,
+        })
+        res.json(car)
+      } catch (err) {
+        res.status(400).json('Error [Add Car]: ' + err)
+      }
       break
 
     default:
